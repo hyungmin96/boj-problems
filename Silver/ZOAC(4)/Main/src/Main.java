@@ -37,7 +37,7 @@ public class Main {
         for (int i = 0; i < keyboard.length; i++) {
             for (int j = 0; j < keyboard[i].length; j++) {
                 if (keyboard[i][j] == c1.charAt(0) || keyboard[i][j] == c2.charAt(0)) {
-                    if (i < 2 && j > 4)
+                    if (i <= 1 && j <= 4 || i == 2 && j < 4)
                         fingers[0] = new Position(i, j);
                     else
                         fingers[1] = new Position(i, j);
@@ -55,7 +55,7 @@ public class Main {
             for (int i = 0; i < keyboard.length; i++) {
                 for (int j = 0; j < keyboard[i].length; j++) {
                     if (keyboard[i][j] == c) {
-                        if (i < 2 && j < 5 || i == 2 && j < 4) {
+                        if (i <= 1 && j <= 4 || i == 2 && j < 4) {
                             answer += Math.abs(fingers[0].x - i) + Math.abs(fingers[0].y - j) + 1; 
                             fingers[0] = new Position(i, j);
                         } else{

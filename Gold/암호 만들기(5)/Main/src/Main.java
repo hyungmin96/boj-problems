@@ -30,16 +30,23 @@ public class Main {
             cnt1 = 0;
             cnt2 = 0;
             return;
-        }else{
-            for(int i = index; i < array.length; i ++){
-                if(!visited[i]){
+        } else {
+            for (int i = index; i < array.length; i++) {
+                if (!visited[i]) {
                     visited[i] = true;
-                    if(array[i].contains("a") || array[i].contains("e") || array[i].contains("i") || array[i].contains("o") || array[i].contains("u"))
+                    if (array[i].contains("a") || array[i].contains("e") || array[i].contains("i")
+                            || array[i].contains("o") || array[i].contains("u"))
                         cnt1++;
                     else
                         cnt2++;
 
                     solution(depth + 1, level, i, curr + array[i], cnt1, cnt2, array, visited);
+                    
+                    if (array[i].contains("a") || array[i].contains("e") || array[i].contains("i")
+                            || array[i].contains("o") || array[i].contains("u"))
+                        cnt1--;
+                    else
+                        cnt2--;
                     visited[i] = false;
                 }
             }
