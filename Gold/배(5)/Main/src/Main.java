@@ -30,8 +30,19 @@ public class Main {
 
         int answer = 0;
 
+        if(arr.get(0) < arr2.get(0)) return - 1;
         while(arr2.size() != 0){
-
+            int index = 0;
+            for(int i = 0; i < arr.size();){
+                if(index == arr2.size()) break;
+                if(arr.get(i) >= arr2.get(index)){
+                    arr2.remove(index);
+                    i ++;
+                }else{
+                    index ++;
+                }
+            }
+            answer ++;
         }
 
         return answer;
