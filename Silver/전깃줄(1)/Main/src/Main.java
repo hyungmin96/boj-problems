@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.Arrays;
 import java.util.StringTokenizer;
-public class App {
+public class Main {
 
     static class Position implements Comparable<Position>{
         int left, right;
@@ -11,7 +11,7 @@ public class App {
         }
 
         @Override
-        public int compareTo(App.Position o) {
+        public int compareTo(Main.Position o) {
             return this.left - o.left;
         }
     }
@@ -27,21 +27,21 @@ public class App {
         }
 
         Arrays.sort(array);
-        System.out.println(solution(array));
+        System.out.println(solution(n, array));
     }
 
-    public static int solution(Position[] array){
-        int answer = 0;
+    public static int solution(int n, Position[] array){
         int[] cross = new int[array.length];
 
         for(int i = 0; i < array.length; i ++){
-            for(int j = i + 1; j < array.length; j ++){
-                if(array[j].right < array[i].right){
-                    cross[i] += 1;
+            cross[i] = 1;
+            for(int j = 0; j < i; j ++){
+                if(array[i].right > array[j].right){
+                    cross[i] = Math.max(cross[i], cross[j] + 1);
                 }
             }
         }
 
-        return answer;
+        return n - Arrays.stream(cross).max().getAsInt();
     }
 }
