@@ -10,32 +10,41 @@ public class Main {
 
     public static int solution(String s) {
 
-        int mul = 1; // 'multiplication' 곱셈
-        int sum = 0;
+        Stack<String> stack = new Stack<>();
+        int temp = 0;
 
-        Stack<Character> st = new Stack<>();
-
-        for(Character c : s.toCharArray()){
-            if(c == '(' || c == '['){
-                st.push(c);
-                if(c == '('){
-                    mul *= 2;
-                }else{
-                    mul *= 3;
-                }
+        for(int i = 0; i < s.length(); i ++){
+            if(s.charAt(i) == '(' || s.charAt(i) == '['){
+                stack.push(String.valueOf(s.charAt(i)));
             }else{
-                Character c1 = st.pop();
+                if(s.charAt(i - 1) == '(' && s.charAt(i) == ')'){
+                    stack.pop();
+                    stack.push("2");
+                }else{
+                    if(stack.peek() == "[")
+                        return 0;
+                    else{
+                        if(stack.peek().charAt(0) != '(' || stack.peek().charAt(0) != '['){
+                            temp += Integer.parseInt(stack.peek());
+                        }else if(stack.peek().charAt(0) == '('){
+                            temp *= 2;
+                        }else if(stack.peek().charAt(0) == '('){
+                            temp *= 3;
+                        }
+                        stack.pop();
+                        stack.push(String.valueOf(temp));
+                        temp = 0;
+                    }
+                }
                 
-                if(st.isEmpty() || c == ')' && c1 == '[') return 0;
-                if(st.isEmpty() || c == ']' && c1 == '(') return 0;
-
-                if(c1 == '(' && c == ')'){
-                    st.push((char)2);
-                }else if(c1 == '[' && c == ']'){
-                    st.push((char)3);
+                if(s.charAt(i - 1) == '[' && s.charAt(i) == ']'){
+                    stack.pop();
+                    stack.push("3");
                 }
             }
+
         }
-        return sum;
+
+        return 0;
     }
 }
