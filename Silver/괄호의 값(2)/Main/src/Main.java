@@ -10,41 +10,71 @@ public class Main {
 
     public static int solution(String s) {
 
-        Stack<String> stack = new Stack<>();
-        int temp = 0;
+        Stack<String> st = new Stack<>();
+        int answer = 0;
 
-        for(int i = 0; i < s.length(); i ++){
-            if(s.charAt(i) == '(' || s.charAt(i) == '['){
-                stack.push(String.valueOf(s.charAt(i)));
-            }else{
-                if(s.charAt(i - 1) == '(' && s.charAt(i) == ')'){
-                    stack.pop();
-                    stack.push("2");
-                }else{
-                    if(stack.peek() == "[")
+        if(s.length() % 2 != 0) return 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '(' || s.charAt(i) == '[')
+                st.push(s.charAt(i) + "");
+            else {
+                if(st.size() == 0){
+                    if(s.charAt(i) == ')' || s.charAt(i) == ']') 
                         return 0;
-                    else{
-                        if(stack.peek().charAt(0) != '(' || stack.peek().charAt(0) != '['){
-                            temp += Integer.parseInt(stack.peek());
-                        }else if(stack.peek().charAt(0) == '('){
-                            temp *= 2;
-                        }else if(stack.peek().charAt(0) == '('){
-                            temp *= 3;
+                }
+
+                if (s.charAt(i) == ')') {
+                    if (s.charAt(i - 1) == '[') {
+                        return 0;
+                    } else {
+                        if (s.charAt(i - 1) == '(') {
+                            st.pop();
+                            st.push("2");
+                        } else {
+                            int temp = 0;
+                            while (!st.isEmpty() && !st.peek().equals("(")) {
+                                String str = st.pop();
+                                if (!str.equals("(") && !str.equals("[")) {
+                                    temp += Integer.parseInt(str);
+                                }else if(str.equals("[")) return 0;
+                            }
+                            if(!st.isEmpty())
+                                st.pop();
+                            st.push(String.valueOf(temp * 2));
                         }
-                        stack.pop();
-                        stack.push(String.valueOf(temp));
-                        temp = 0;
+                    }
+                } else {
+                    if (s.charAt(i - 1) == '(') {
+                        return 0;
+                    } else {
+                        if (s.charAt(i - 1) == '[') {
+                            st.pop();
+                            st.push("3");
+                        } else {
+                            int temp = 0;
+                            while (!st.isEmpty() && !st.peek().equals("[")) {
+                                String str = st.pop();
+                                if (!str.equals("(") && !str.equals("[")) {
+                                    temp += Integer.parseInt(str);
+                                }else if(str.equals("(")) return 0;
+                            }
+                            if(!st.isEmpty())
+                                st.pop();
+
+                            st.push(String.valueOf(temp * 3));
+                        }
                     }
                 }
-                
-                if(s.charAt(i - 1) == '[' && s.charAt(i) == ']'){
-                    stack.pop();
-                    stack.push("3");
-                }
             }
-
         }
 
-        return 0;
+        while (!st.isEmpty()) {
+            if(st.peek().equals("(") || st.peek().equals("["))  
+                return 0;
+            answer += Integer.parseInt(st.pop());
+        }
+
+        return answer;
     }
 }
