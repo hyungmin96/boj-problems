@@ -40,7 +40,6 @@ public class Main {
     }
 
     public static void getDiff(int n, int[][] board){
-
         int t1 = 0;
         int t2 = 0;
         for(int i = 0; i < n; i ++){
