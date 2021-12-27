@@ -16,7 +16,7 @@ public class Main {
 
         // System.out.println(solution(n, s - 1, arr, visited));
         dfs(s - 1, n, arr, visited);
-        System.err.println(ans);
+        System.out.println(ans);
     }
 
     public static int solution(int n, int s, int[] arr, boolean[] visited) {
