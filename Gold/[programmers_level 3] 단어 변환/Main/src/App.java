@@ -1,3 +1,5 @@
+import java.util.Collections;
+
 class Solution {
     
     static int answer = Integer.MAX_VALUE;
