@@ -1,11 +1,14 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.StringTokenizer;
 public class Main {
 
     private static int[][] board;
     private static int[] dx = new int[] { 0, 0,-1, 1 };
     private static int[] dy = new int[] {-1, 1, 0, 0 };
+    private static boolean[][] visited;
     private static int N, M, T;
 
     public static void main(String[] args) throws Exception {
@@ -15,6 +18,7 @@ public class Main {
         M = Integer.parseInt(st.nextToken());
         T = Integer.parseInt(st.nextToken());
         board = new int[N][M];
+        visited = new boolean[N][M];
         int[][] spins = new int[T][3];
 
         for(int i = 0; i < N; i ++){
@@ -40,36 +44,45 @@ public class Main {
         for(int k = 0; k < T; k ++){
             spin(k, spins);
             boolean flag = false;
+            visited = new boolean[N][M];
+            Queue<int[]> que = new LinkedList<>();
 
             for(int i = 0; i < N; i ++){
                 for(int j = 0; j < M; j ++){
-                    if(board[i][j] != 0){
+                    boolean added = false;
+                    if(board[i][j] != 0 && !visited[i][j]){
+                        visited[i][j] = true;
                         if(j == 0){
                             if(board[i][j] == board[i][M - 1]){
-                                board[i][j] = 0;
-                                board[i][M - 1] = 0;
+                                que.offer(new int[] { i, M - 1 });
                                 flag = true;
+                                added = true;
                             }
                         }else if(j == M - 1){
                             if(board[i][j] == board[i][0]){
-                                board[i][j] = 0;
-                                board[i][0] = 0;
+                                que.offer(new int[] { i, 0 });
                                 flag = true;
+                                added = true;
                             }
                         }
                         for(int m = 0; m < dx.length; m ++){
                             int nr = i + dx[m];
                             int nc = j + dy[m];
-                            if(nr < 0 || nc < 0 || nr >= N || nc >= M || board[nr][nc] == 0)
+                            if(nr < 0 || nc < 0 || nr >= N || nc >= M || visited[nr][nc] || board[nr][nc] == 0)
                                 continue;
                             if(board[i][j] == board[nr][nc]){
                                 flag = true;
-                                board[i][j] = 0;
-                                board[nr][nc] = 0;
+                                added = true;
+                                que.offer(new int[] { nr, nc });
                             }
                         }
+                        if(flag && added) que.offer(new int[] { i, j });
                     }
                 }
+            }
+            while(!que.isEmpty()){
+                int[] curr = que.poll();
+                board[curr[0]][curr[1]] = 0;
             }
             adjacentNumber(flag);
         }
@@ -96,7 +109,7 @@ public class Main {
             for(int[] item : arr){
                 if(item[2] > average){
                     board[item[0]][item[1]] -= 1;
-                }else{
+                }else if(item[2] < average){
                     board[item[0]][item[1]] += 1;
                 }
             }
