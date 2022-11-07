@@ -21,7 +21,7 @@ public class Main {
         M = Integer.parseInt(st.nextToken());
         vertex = new ArrayList[N + 1];
 
-        long left = 0, right = 0;
+        long left = 0, right = 1000000000;
         for(int i = 1; i <= N; i ++) vertex[i] = new ArrayList<>();
         for(int i = 0; i < M; i ++){
             st = new StringTokenizer(br.readLine(), " ");
@@ -30,8 +30,6 @@ public class Main {
             long cost = Integer.parseInt(st.nextToken());
             vertex[s].add(new Pair(s, e, cost));
             vertex[e].add(new Pair(e, s, cost));
-
-            right = Math.max(right, cost);
         }
 
         st = new StringTokenizer(br.readLine(), " ");
