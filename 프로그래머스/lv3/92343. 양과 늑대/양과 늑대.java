@@ -14,25 +14,27 @@ class Solution {
             vertex[e[0]].add(e[1]);
             vertex[e[1]].add(e[0]);
         }
-        dfs(0, 0, 0, info);
+                info[0] = -1;
+
+        dfs(0, 1, 0, info);
         return answer;
     }
     
     public void dfs(int node, int s, int w, int[] info){
-        if(info[node] == 0) s ++;
-        else if(info[node] == 1) w ++;
-
         if(w >= s) return;
         answer = Math.max(answer, s);
-
         for(int next : vertex[node]){
-            int temp = info[node];
+            int temp = info[next];
+            if(info[next] == 0) s ++;
+            else if(info[next] == 1) w ++;
             if(!check[next][s][w]){
-                info[node] = -1;
-                check[node][s][w] = true;
+                info[next] = -1;
+                check[next][s][w] = true;
                 dfs(next, s, w, info);
-                info[node] = temp;
-                check[node][s][w] = false;
+                check[next][s][w] = false;
+                info[next] = temp;
+                if(temp == 0) s --;
+                else if(temp == 1) w --;
             }
         }
     }
