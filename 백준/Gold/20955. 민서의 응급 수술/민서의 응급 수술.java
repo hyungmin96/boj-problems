@@ -25,13 +25,13 @@ public class Main {
             if(!union(to, from)) answer ++;
         }
         
-        HashSet<Integer> hs = new HashSet<>();
         for(int i = 1; i <= n; i ++){
-            hs.add(find(i));
+            if(i == find(p[i])){
+                answer ++;
+            }
         }
 
-        answer += hs.size() - 1;
-        System.out.println(answer);
+        System.out.println(answer - 1);
     }
 
     public static boolean union(int a, int b){
