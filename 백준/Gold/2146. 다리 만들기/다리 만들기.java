@@ -55,11 +55,13 @@ public class Main {
                 int nc = cur[1] + d[1];
                 if(isOutRange(nr, nc) || v2[nr][nc]) continue;
                 v2[nr][nc] = true;
-                if(map[nr][nc] != 0 && map[nr][nc] != land){
-                    min = Math.min(cur[2], min);
-                    return;
+                if(map[nr][nc] != land){
+                    if(map[nr][nc] != 0){
+                        min = Math.min(cur[2], min);
+                        return;
+                    }
+                    que.offer(new int[] { nr, nc, cur[2] + 1 });
                 }
-                que.offer(new int[] { nr, nc, cur[2] + 1 });
             }
         }
     }
