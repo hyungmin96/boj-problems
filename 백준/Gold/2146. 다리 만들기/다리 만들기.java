@@ -57,7 +57,7 @@ public class Main {
                 v2[nr][nc] = true;
                 if(map[nr][nc] == 1 && idx[nr][nc] != land){
                     min = Math.min(cur[2], min);
-                    continue;
+                    return;
                 }
                 que.offer(new int[] { nr, nc, cur[2] + 1 });
             }
