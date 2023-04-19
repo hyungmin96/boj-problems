@@ -41,7 +41,7 @@ public class Main {
                 check(r, c, i, true);
                 dfs(depth + 1, cur * ((i * 4) + 1), cnt + 1);
                 check(r, c, i, false);
-            }
+            }else break;
         }
 
         dfs(depth + 1, cur, cnt);
