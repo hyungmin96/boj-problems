@@ -31,11 +31,12 @@ public class Main {
             p[i] = new Pair(t, s);
 
             int idx = 0;
-            for(int j = 0; idx <= str.length() && j <= str.length(); j ++){
-                if(str.substring(idx, j).contains(t)){
-                    idx = j;
-                    scores[j].add(new int[] { t.length(), s });
-                }
+            while(idx < str.length()){
+                int cur = str.indexOf(t, idx);
+                if(cur != -1){
+                    idx = cur + 1;
+                    scores[cur + t.length()].add(new int[] { t.length(), s });
+                }else break;
             }
         }
 
