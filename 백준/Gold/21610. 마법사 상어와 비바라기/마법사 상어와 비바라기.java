@@ -12,6 +12,7 @@ public class Main {
 class Solution {
     
     public int N, M;
+    public long answer = 0;
     public int[][] map;
     public boolean[][] v;
     public int[][] dirs = {
@@ -37,7 +38,9 @@ class Solution {
         for(int i = 0; i < N; i ++){
             st = new StringTokenizer(br.readLine(), " ");
             for(int j = 0; j < N; j ++){
-                map[i][j] = Integer.parseInt(st.nextToken());
+                int num = Integer.parseInt(st.nextToken());
+                answer += num;
+                map[i][j] = num;
             }
         }
 
@@ -47,7 +50,6 @@ class Solution {
         pos.add(new int[] { N - 2, 0 });
         pos.add(new int[] { N - 2, 1 });
 
-        StringBuilder sb = new StringBuilder();
         for(int i = 0; i < M; i ++){
             st = new StringTokenizer(br.readLine(), " ");
 
@@ -59,7 +61,7 @@ class Solution {
             createCloud(pos);
         }
 
-        System.out.println(count());
+        System.out.println(answer);
     }
 
     public void createCloud(ArrayList<int[]> pos){
@@ -68,6 +70,7 @@ class Solution {
             for(int c = 0; c < N; c ++){
                 if(map[r][c] > 1 && !v[r][c]){
                     map[r][c] -= 2;
+                    answer -= 2;
                     pos.add(new int[] { r, c });
                 }
             }
@@ -78,20 +81,12 @@ class Solution {
     public ArrayList<int[]> move(int d, int s, ArrayList<int[]> pos){
         ArrayList<int[]> tmp = new ArrayList<>();
         for(int[] p : pos){
-            int tmp_s = s;
-            while(tmp_s -- > 0){
-                int nr = p[0] + dirs[d][0];
-                int nc = p[1] + dirs[d][1];
-                
-                if(nr < 0) nr = N - 1;
-                if(nr >= N) nr = 0;
-                if(nc < 0) nc = N - 1;
-                if(nc >= N) nc = 0;
 
-                p[0] = nr;
-                p[1] = nc;
-            }
+            p[0] = (N + p[0] + (dirs[d][0] * (s % N))) % N;
+            p[1] = (N + p[1] + (dirs[d][1] * (s % N))) % N;
+
             map[p[0]][p[1]] ++;
+            answer ++;
             tmp.add(new int[] { p[0], p[1] });
 
             v[p[0]][p[1]] = true;
@@ -113,17 +108,11 @@ class Solution {
             }
         }
 
-        for(int r = 0; r < N; r ++)
-            for(int c = 0; c < N; c ++)
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < N; c ++){
+                answer += tmp[r][c];
                 map[r][c] += tmp[r][c];
-    }
-
-    public long count(){
-        long answer = 0;
-        for(int r = 0; r < N; r ++)
-            for(int c = 0; c < N; c ++)
-                answer += map[r][c];
-        
-        return answer;
+            }
+        }
     }
 }
