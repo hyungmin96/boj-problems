@@ -6,11 +6,11 @@ class Solution {
         int[][] dp = new int[onboard.length][55];
         for(int i = 0; i < onboard.length; i ++)
             Arrays.fill(dp[i], INF);
-        
+
         temperature += 10;
         t1 += 10;
         t2 += 10;
-        
+
         dp[0][temperature] = 0;
         for(int i = 0; i < onboard.length - 1; i ++){
             for(int j = 0; j < 52; j ++){
@@ -23,7 +23,7 @@ class Solution {
                     dp[i + 1][j - 1] = Math.min(dp[i + 1][j - 1], dp[i][j] + a);
                 // 에어컨을 사용하여 온도 유지하기
                 dp[i + 1][j] = Math.min(dp[i + 1][j], dp[i][j] + b); 
-                
+
                 // 에어컨 끄기
                 int next_tmp = j;
                 if(j < temperature){
@@ -38,7 +38,7 @@ class Solution {
                     dp[i + 1][next_tmp] = Math.min(dp[i + 1][next_tmp], dp[i][j]);
             }
         }
-        
+
         for(int i = 0; i < 52; i ++){
             if(onboard[onboard.length - 1] == 1 && (i < t1 || i > t2)) continue;
             answer = Math.min(answer, dp[onboard.length - 1][i]);
