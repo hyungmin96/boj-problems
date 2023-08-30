@@ -3,54 +3,57 @@ import java.util.*;
 
 public class Main {
 
-    static int[][] arr, dp;
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    int N;
+    int[][] dp, val;
+
+    public int solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int n = Integer.parseInt(br.readLine());
-        
-        arr = new int[n + 1][3];
-        dp = new int[n + 1][3];
-        for(int i = 0; i < n; i ++){
+        N = Integer.parseInt(br.readLine());
+        dp = new int[N][3];
+        val = new int[N][3];
+
+        for(int i = 0; i < N; i ++){
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j < 3; j ++){
-                arr[i][j] = Integer.parseInt(st.nextToken());
-            }
+            int red = Integer.parseInt(st.nextToken());
+            int blue = Integer.parseInt(st.nextToken());
+            int green = Integer.parseInt(st.nextToken());
+
+            val[i][0] = red;
+            val[i][1] = blue;
+            val[i][2] = green;
         }
 
-        // dp[0][0] = arr[0][0];
-        // dp[0][1] = arr[0][1];
-        // dp[0][2] = arr[0][2];
+        int INF = 987654321;
+        int answer = INF;
+        for(int k = 0; k < 3; k ++){
+            for(int i = 0; i < N; i ++)
+                Arrays.fill(dp[i], INF);
+            dp[0][k] = val[0][k];
 
-        int red = 987654321;
-        int blue = 987654321;
-        int green = 987654321;
-        for(int color = 0; color < 3; color ++){ // 첫 번째 집을 Color색으로 칠 할 경우
+            int tmp = val[N - 1][k];
+            val[N - 1][k] = INF;
+            for(int i = 1; i < N; i ++){
+                for(int j = 0; j < 3; j ++){
+                    for(int l = 0; l < 3; l ++){
+                        if(j == l) continue;
+                        dp[i][j] = Math.min(dp[i][j], dp[i - 1][l] + val[i][j]);
+                    }
+                }
+            }
             for(int i = 0; i < 3; i ++){
-                if(color == i){
-                    dp[1][i] = arr[0][i];
-                }else{
-                    dp[1][i] = 987654321;
-                }
+                answer = Math.min(answer, dp[N - 1][i]);
             }
-
-            for(int d = 2; d <= n; d ++){
-                dp[d][0] = Math.min(dp[d - 1][1], dp[d - 1][2]) + arr[d - 1][0];
-                dp[d][1] = Math.min(dp[d - 1][0], dp[d - 1][2]) + arr[d - 1][1];
-                dp[d][2] = Math.min(dp[d - 1][0], dp[d - 1][1]) + arr[d - 1][2];
-
-                if(d == n){
-                    if(color == 0){
-                        red = Math.min(dp[n][1], dp[n][2]);
-                    }
-                    if(color == 1){
-                        blue = Math.min(dp[n][0], dp[n][2]);
-                    }
-                    if(color == 2){
-                        green = Math.min(dp[n][0], dp[n][1]);
-                    }
-                }
-            }
+            val[N - 1][k] = tmp;
         }
-        System.out.println(Math.min(red, Math.min(blue, green)));
+        System.out.println(answer);
+        return 0;
     }
 }
