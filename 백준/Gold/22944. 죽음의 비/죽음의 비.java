@@ -83,8 +83,8 @@ public class Main {
                 }
                 
                 if(hp == 0) continue;
-                if(check[nr][nc] < hp){
-                    check[nr][nc] = hp;
+                if(check[nr][nc] < hp + dp){
+                    check[nr][nc] = hp +dp;
                     que.offer(new Info(nr, nc, hp, dp, time + 1, state));
                 }
             }

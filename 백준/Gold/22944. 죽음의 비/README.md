@@ -1,14 +1,14 @@
-# [Gold IV] 죽음의 비 - 22944 
+# [Gold III] 죽음의 비 - 22944 
 
 [문제 링크](https://www.acmicpc.net/problem/22944) 
 
 ### 성능 요약
 
-메모리: 51384 KB, 시간: 472 ms
+메모리: 46708 KB, 시간: 424 ms
 
 ### 분류
 
-백트래킹(backtracking), 너비 우선 탐색(bfs), 브루트포스 알고리즘(bruteforcing), 그래프 이론(graphs), 그래프 탐색(graph_traversal)
+백트래킹, 너비 우선 탐색, 브루트포스 알고리즘, 그래프 이론, 그래프 탐색
 
 ### 문제 설명
 
