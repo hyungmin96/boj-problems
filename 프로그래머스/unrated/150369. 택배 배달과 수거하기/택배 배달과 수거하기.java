@@ -2,43 +2,48 @@ import java.util.*;
 class Solution {
     public long solution(int cap, int n, int[] deliveries, int[] pickups) {
         long answer = 0;
-        Stack<Integer> d = new Stack<>();
-        Stack<Integer> p = new Stack<>();
+        Stack<Integer> delivery = new Stack<>();
+        Stack<Integer> pickup = new Stack<>();
         
         for(int i = 0; i < deliveries.length; i ++){
-            d.push(deliveries[i]);
-            p.push(pickups[i]);
+            delivery.push(deliveries[i]);
         }
         
+        for(int i = 0; i < pickups.length; i ++){
+            pickup.push(pickups[i]);
+        }
         
-        while(!d.isEmpty() || !p.isEmpty()){
-            int cargo = 0;
-            int box = 0;
+        while(!(delivery.isEmpty() && pickup.isEmpty())){
+            int dist = 0;
+            while(!delivery.isEmpty() && delivery.peek() == 0) delivery.pop();
+            dist = Math.max(dist, delivery.size());
             
-            while(!d.isEmpty()) if(d.peek() == 0) d.pop(); else break;
-            while(!p.isEmpty()) if(p.peek() == 0) p.pop(); else break;
-            
-            int dist = Math.max(d.size(), p.size()) * 2;
-            while(!d.isEmpty()){
-                if(d.peek() + cargo <= cap)
-                    cargo += d.pop();  
-                else{
-                    d.push(d.pop() - (cap - cargo));
+            int tmp = cap;
+            while(!delivery.isEmpty() && tmp > 0){
+                int cur = delivery.pop();
+                if(tmp - cur < 0){
+                    delivery.push(cur - tmp);
                     break;
-                }
-            }
-            while(!p.isEmpty()){
-                if(p.peek() + box <= cap)
-                    box += p.pop();
-                else{
-                    p.push(p.pop() - (cap - box));
-                    break;
+                }else{
+                    tmp -= cur;
                 }
             }
             
+            tmp = cap;
+            while(!pickup.isEmpty() && pickup.peek() == 0) pickup.pop();
+            dist = Math.max(dist, pickup.size());
+            while(!pickup.isEmpty() && tmp > 0){
+                int cur = pickup.pop();
+                if(tmp - cur < 0){
+                    pickup.push(cur - tmp);
+                    break;
+                }else{
+                    tmp -= cur;
+                }
+            }
             answer += dist;
         }
         
-        return answer;
+        return answer * 2;
     }
 }
