@@ -1,38 +1,62 @@
 import java.util.*;
 class Solution {
-    
-    String answer = "";
-    char[] ch = new char[] { 'd', 'l', 'r', 'u' };
+    // d, l, r, u 순서
+    int max_r = 0, max_c = 0;
+    int[] s = new int[2], e = new int[2];
     int[][] dirs = {{ 1, 0 }, { 0, -1 }, { 0, 1 }, { -1, 0 }};
-    int[][] map;
-    
+    char[] ch = new char[] { 'd', 'l', 'r', 'u' };
     public String solution(int n, int m, int x, int y, int r, int c, int k) {
-        map = new int[n + 1][m + 1];
-        int diff = Math.abs(x - r) + Math.abs(y - c);
-        if((diff % 2 == 0 && k % 2 == 0) || (diff % 2 == 1 && k % 2 == 1)){
-            dfs(0, n, m, x, y, r, c, k, x, y, "", diff);
-        }
+        String answer = "impossible";
         
-        if(answer.equals("")) answer = "impossible";
-        return answer;
-    }
-    
-    public boolean dfs(int depth, int n, int m, int x, int y, int r, int c, int k, int cr, int cc, String cur, int diff){
-        if(k == 0 && diff == 0){
-            answer = cur;
-            return true;
-        }
-            
-        for(int d = 0; d < 4; d ++){
-            int nr = cr + dirs[d][0];
-            int nc = cc + dirs[d][1];
-            if(nr > 0 && nc > 0 && nr <= n && nc <= m && !(k < diff)){
-                if(dfs(depth + 1, n, m, x, y, r, c, k - 1, nr, nc, cur + ch[d], Math.abs(nr - r) + Math.abs(nc - c))){
-                    return true;
+        x -= 1;
+        y -= 1;
+        r -= 1;
+        c -= 1;
+        max_r = n;
+        max_c = m;
+        s = new int[] { x, y };
+        e = new int[] { r, c };
+        
+        ArrayList<Character> list = new ArrayList<>();
+        int d = getDistance(x, y, r, c);
+        if((d % 2 == 0 && k % 2 == 0) || (d % 2 != 0 && k % 2 != 0)){
+            if(dfs(0, s[0], s[1], k, list)){
+                answer = "";
+                for(char cha : list){
+                    answer += cha;
                 }
             }
         }
+        
+        return answer;
+    }
+    
+    public boolean dfs(int depth, int r, int c, int k, ArrayList<Character> list){
+        if(getDistance(r, c, e[0], e[1]) > k - depth){
+            return false;
+        }
+        
+        if(r == e[0] && c == e[1] && depth == k){
+            return true;
+        }
+        
+        for(int d = 0; d < 4; d ++){
+            int nr = r + dirs[d][0];
+            int nc = c + dirs[d][1];
+            if(isOutRange(nr, nc)) continue;
+            list.add(ch[d]);
+            if(dfs(depth + 1, nr, nc, k, list)) return true;
+            list.remove(list.size() - 1);
+        }
+        
         return false;
     }
     
+    public boolean isOutRange(int r, int c){
+        return r < 0 || c < 0 || r >= max_r || c >= max_c;
+    }
+    
+    public int getDistance(int r, int c, int dr, int dc){
+        return Math.abs(r - dr) + Math.abs(c - dc);
+    }
 }
