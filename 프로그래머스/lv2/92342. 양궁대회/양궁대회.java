@@ -1,74 +1,57 @@
 import java.util.*;
 class Solution {
     
-    int diff = 0;
-    ArrayList<int[]> list = new ArrayList<>();
-    
+    int answer_score = 0;
+    int[] answer = new int[] { -1 };
     public int[] solution(int n, int[] info) {
-        int[] answer = new int[11];
-        dfs(n, 0, 0, new int[info.length], info);
-        if(list.size() > 0){
-            ArrayList<Integer> sub = new ArrayList<>();
-            while(list.size() != 1){
-                for(int k = 10; k >= 0; k --){
-                    int num = 1;
-                    for(int j = 0; j < list.size(); j ++){
-                        if(list.get(j)[k] >= num){
-                            if(list.get(j)[k] > num){
-                                sub.clear();
-                            }
-                            num = list.get(j)[k];
-                            sub.add(j);
-                        }
-                    }
-                    if(sub.size() > 0){
-                        ArrayList<int[]> temp = new ArrayList<>();
-                        for(int s : sub){
-                            temp.add(list.get(s).clone());
-                        }
-                        list.clear();
-                        list.addAll(temp);
-                    }
-                    if(sub.size() == 1) break; else sub.clear();
-                }
-            }
-            for(int j = 0; j < 11; j ++){
-                answer[j] = list.get(0)[j];
-            }
-        }else answer = new int[] { -1 };
+        dfs(n, 0, 0, new int[11], info);
         return answer;
     }
     
     public void dfs(int n, int depth, int idx, int[] arr, int[] info){
         if(depth == n){
-            int apeach = 0;
-            int rion = 0;
-            
+            int appeach_score = 0, rion_score = 0;
             for(int i = 0; i < info.length; i ++){
-                int score = 10 - i;
-                if(info[i] > 0 && info[i] >= arr[i]){
-                    apeach += score;
-                }else if(arr[i] > info[i] && arr[i] > 0){
-                    rion += score;
+                int appeach_cnt = info[i];
+                int rion_cnt = arr[i];
+                
+                if(info[i] == 0 && arr[i] == 0) continue;
+                if(appeach_cnt >= rion_cnt){
+                    appeach_score += (10 - i);
+                }else{
+                    rion_score += (10 - i);
                 }
             }
             
-            if(rion - apeach > 0){
-                if(diff <= rion - apeach){
-                    if(diff < rion - apeach){
-                        diff = rion - apeach;
-                        list.clear();
+            int diff = rion_score - appeach_score;
+            if(answer_score <= diff && diff > 0){
+                if(answer[0] == -1 || diff > answer_score){
+                    answer = copy(arr);
+                }else{
+                    for(int i = 10; i >= 0; i --){
+                        if(arr[i] > answer[i]){
+                            answer = copy(arr);
+                            break;
+                        }else if(answer[i] > arr[i]){ 
+                            break;
+                        }
                     }
-                    list.add(arr.clone());
                 }
+                answer_score = diff;
             }
             return;
         }
         
-        for(int i = idx; i <= 10; i ++){
+        for(int i = idx; i < 11; i ++){
             arr[i] ++;
             dfs(n, depth + 1, i, arr, info);
             arr[i] --;
         }
+    }
+    
+    public int[] copy(int[] arr){
+        int[] tmp = new int[11];
+        for(int i = 0; i < arr.length; i ++) tmp[i] = arr[i];
+        return tmp;
     }
 }
