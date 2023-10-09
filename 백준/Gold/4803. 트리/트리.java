@@ -1,61 +1,79 @@
 import java.io.*;
 import java.util.*;
+public class Main{
+    public static void main(String[] args) throws IOException{
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+    
+class Solution{
 
-public class Main {
+    int[] uf;
 
-    public static void main(String[] args) throws IOException {
-
+    public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringBuilder sb = new StringBuilder();
-
-        int idx = 0;
+        int tc = 0;
         while(true){
-            idx ++;
+            tc ++;
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            int n = Integer.parseInt(st.nextToken());
-            int m = Integer.parseInt(st.nextToken());
+            int nodes = Integer.parseInt(st.nextToken());
+            int edge = Integer.parseInt(st.nextToken());
 
-            if(n == 0 && m == 0) break;
-            
-            boolean[] check = new boolean[n + 1];
-            ArrayList<Integer>[] vertex = new ArrayList[n + 1];
+            if(nodes == 0 && edge == 0) break;
 
-            for(int i = 1; i <= n; i ++) vertex[i] = new ArrayList<>();
-            for (int i = 0; i < m; i ++){
+            uf = new int[nodes + 1];
+            for(int i = 1; i <= nodes; i ++) uf[i] = i;
+            for(int i = 0; i < edge; i ++){
                 st = new StringTokenizer(br.readLine(), " ");
-                int start = Integer.parseInt(st.nextToken());
-                int end = Integer.parseInt(st.nextToken());
+                int a = Integer.parseInt(st.nextToken());
+                int b = Integer.parseInt(st.nextToken());
 
-                vertex[start].add(end);
-                vertex[end].add(start);
+                union(a, b);
             }
 
-            int cnt = 0;
-            for(int i = 1; i <= n; i ++){
-                if(!check[i]){
-                    check[i] = true;
-                    if(dfs(i, -1, check, vertex)) cnt ++;
+            HashSet<Integer> set = new HashSet<>();
+            for(int i = 1; i <= nodes; i ++){
+                int parent = find(uf[i]);
+                if(parent > 0){
+                    set.add(parent);
                 }
             }
+
+            int cnt = set.size();
             if(cnt == 0){
-                sb.append("Case " + idx + ": No trees.\n");
+                sb.append(String.format("Case %d: No trees.", tc));
             }else if(cnt == 1){
-                sb.append("Case " + idx + ": There is one tree.\n");
+                sb.append(String.format("Case %d: There is one tree.", tc));
             }else{
-                sb.append("Case " + idx + ": A forest of " + cnt + " trees.\n");
+                sb.append(String.format("Case %d: A forest of %d trees.", tc, cnt));
             }
+            sb.append("\n");
         }
 
         System.out.println(sb.toString());
     }
 
-    public static boolean dfs(int node, int pre, boolean[] check, ArrayList<Integer>[] vertex){
-        for(int next : vertex[node]){
-            if(next == pre) continue;
-            if(check[next]) return false;
-            check[next] = true;
-            if(!dfs(next, node, check, vertex)) return false;
+    public void union(int a, int b){
+        a = find(a);
+        b = find(b);
+
+        if(b < a){
+            int tmp = a;
+            a = b;
+            b = tmp;
         }
-        return true;
+
+        if(a == b){
+            uf[a] = 0;
+        }else{
+            uf[b] = a;
+        }
+    }
+
+    public int find(int a){
+        if(a == uf[a]) return a;
+        return find(uf[a]);
     }
 }
