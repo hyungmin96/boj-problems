@@ -1,65 +1,73 @@
 import java.io.*;
 import java.util.*;
+public class Main{
+    public static void main(String[] args) throws IOException{
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+    
+class Solution{
 
-public class Main {
-
-    static int N, K, P, X, answer = 0;
-    static int[][] display = {
-            { 1, 1, 1, 0, 1, 1, 1 },
-            { 0, 0, 1, 0, 0, 0, 1 },
-            { 0, 1, 1, 1, 1, 1, 0 },
-            { 0, 1, 1, 1, 0, 1, 1 },
-            { 1, 0, 1, 1, 0, 0, 1 },
-            { 1, 1, 0, 1, 0, 1, 1 },
-            { 1, 1, 0, 1, 1, 1, 1 },
-            { 0, 1, 1, 0, 0, 0, 1 },
-            { 1, 1, 1, 1, 1, 1, 1 },
-            { 1, 1, 1, 1, 0, 1, 1 }
+    int N, P, K, X;
+    final boolean[][] digit = {
+        { true, true, true, false, true, true, true },
+        { false, false, false, false, false, true, true },
+        { false, true, true, true, true, true, false },
+        { false, false, true, true, true, true, true },
+        { true, false, false, true, false, true, true },
+        { true, false, true, true, true, false, true },
+        { true, true, true, true, true, false, true },
+        { false, false, true, false, false, true, true },
+        { true, true, true, true, true, true, true },
+        { true, false, true, true, true, true, true }
     };
 
-    public static void main(String[] args) throws IOException {
+    public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
-        N = Integer.parseInt(st.nextToken()); // 사용가능 층 수
-        K = Integer.parseInt(st.nextToken()); // 디스플레이 표시 수
-        P = Integer.parseInt(st.nextToken()); // 반전 시킬 횟수
-        X = Integer.parseInt(st.nextToken()); // 현재 층 수
+        N = Integer.parseInt(st.nextToken());
+        K = Integer.parseInt(st.nextToken());
+        P = Integer.parseInt(st.nextToken());
+        X = Integer.parseInt(st.nextToken());
 
-        int[] x_digit = getDigit(X);
-        solution(x_digit);
-        System.out.println(answer);
-    }
-
-    public static void solution(int[] x_digit){
-        for(int i = 1; i <= N; i ++){
-            if(i == X) continue;
-
-            int cnt = 0;
-            boolean flag = true;
-            for(int k = 0; k < K; k ++){
-                for(int j = 0; j < 7; j ++){
-                    int[] target = getDigit(i);
-                    int n1 = x_digit[k];
-                    int n2 = target[k];
-                    if(display[n1][j] != display[n2][j]) cnt ++;
-                    if(cnt > P){
-                        flag = false;
-                        break;
-                    }
-                }
-                if(!flag) break;
+        
+        int idx = 0;
+        int tmp = X;
+        int mod = (int)Math.pow(10, K - 1);
+        int[] arr = new int[K];
+        while(idx < K){
+            arr[idx ++] = tmp / mod;
+            if(X / mod > 0){
+                tmp %= mod;
             }
-            if(flag) answer ++;
+            mod /= 10;
         }
+        
+        System.out.println(dfs(0, P, 0, arr));
     }
 
-    public static int[] getDigit(int n){
-        int[] temp = new int[K];
-        for(int i = K - 1; i >= 0; i --){
-            temp[i] = n % 10;
-            n /= 10;
+    public int dfs(int depth, int p, int cur_floor, int[] arr){
+        if(depth == K && cur_floor >= 1 && cur_floor <= N){
+            if(cur_floor == X) return 0;
+            return 1;
         }
-        return temp;
+
+        if(depth == K) return 0;
+
+        int ret = 0;
+        int cur_num = arr[depth];
+        for(int i = 0; i < 10; i ++){
+            int diff_cnt = 0;
+            for(int j = 0; j < 7; j ++){
+                if(digit[i][j] != digit[cur_num][j]){
+                    diff_cnt ++;
+                }
+            }
+            if(diff_cnt > p) continue;
+            ret += dfs(depth + 1, p - diff_cnt, cur_floor * 10 + i, arr);
+        }
+        return ret;
     }
 }
