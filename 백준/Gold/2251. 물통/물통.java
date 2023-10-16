@@ -1,9 +1,7 @@
 import java.io.*;
 import java.util.*;
-
-public class Main {
-
-    public static void main(String[] args) throws IOException {
+public class Main{
+    public static void main(String[] args) throws IOException{
         Solution sol = new Solution();
         sol.solution();
     }
@@ -11,9 +9,8 @@ public class Main {
 
 class Solution {
 
-    public int A, B, C;
-    public boolean[][] v;
-    public HashSet<Integer> set = new HashSet<>();
+    int A, B, C;
+    ArrayList<Integer> answer = new ArrayList<>();
 
     public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -23,48 +20,66 @@ class Solution {
         B = Integer.parseInt(st.nextToken());
         C = Integer.parseInt(st.nextToken());
 
-        v = new boolean[201][201];
-        dfs(0, 0, C);
+        bfs();
+        Collections.sort(answer);
 
-        int idx = 0;
-        int[] arr = new int[set.size()];
-        for(int i : set){
-            arr[idx ++] = i;
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < answer.size(); i ++){
+            sb.append(answer.get(i) + " ");
         }
-        Arrays.sort(arr);
-        for(int i : arr){
-            System.out.print(i + " ");
-        }
+
+        System.out.println(sb.toString());
     }
 
-    public void dfs(int a, int b, int c){
-        if(v[a][b]) return;
-        v[a][b] = true;
+    public void bfs(){
+        boolean[][][] v = new boolean[201][201][201];
+        Queue<int[]> q = new LinkedList<>();
+        q.offer(new int[] { 0, 0, C });
 
-        if(a == 0)
-            set.add(c);
-        // A가 B에게 물을 줄 때
-        if(a + b > B) dfs(a + b - B, B, c);
-        else dfs(0, a + b, c);
+        while(!q.isEmpty()){
+            int[] cur = q.poll();
+            if(v[cur[0]][cur[1]][cur[2]]) continue;
+            v[cur[0]][cur[1]][cur[2]] = true;
 
-        // A가 C에게 물을 줄 때
-        if(a + c > C) dfs(a + c - C, b, C);
-        else dfs(0, b, a + c);
+            if(cur[0] == 0 && !answer.contains(cur[2])){
+                answer.add(cur[2]);
+            }
+            // 물통 C에서 옮기는 경우
+            if(cur[0] + cur[2] >= A){
+                q.offer(new int[] { A, cur[1], cur[2] + cur[0] - A});
+            }else{
+                q.offer(new int[] { cur[0] + cur[2], cur[1], 0});
+            }
+            if(cur[1] + cur[2] >= B){
+                q.offer(new int[] { cur[0], B, cur[2] + cur[1] - B});
+            }else{
+                q.offer(new int[] { cur[0], cur[1] + cur[2], 0});
+            }
 
-        // B가 A에게 물을 줄 때
-        if(a + b > A) dfs(A, a + b - A, c);
-        else dfs(a + b, 0, c);
-
-        // B가 C에게 물을 줄 때
-        if(b + c > C) dfs(a, b + c - C, C);
-        else dfs(a, 0, b + c);
-
-        // C가 A에게 물을 줄 때
-        if(a + c > A) dfs(A, b, a + c - A);
-        else dfs(a + c, b, 0);
-
-        // C가 B에게 물을 줄 때
-        if(b + c > B) dfs(a, B, b + c - B);
-        else dfs(a, b + c, 0);
+            // 물통 B에서 옮기는 경우
+            if(cur[0] + cur[1] >= A){
+                q.offer(new int[] { A, cur[1] + cur[0] - A, cur[2] });
+            }else{
+                q.offer(new int[] { cur[0] + cur[1], 0, cur[2]});
+            }
+            if(cur[1] + cur[2] >= C){
+                q.offer(new int[] { cur[0], cur[1] + cur[2] - C, C });
+            }else{
+                q.offer(new int[] { cur[0], 0, cur[2] + cur[1] });
+            }
+            
+            // 물통 A에서 옮기는 경우
+            if(cur[0] + cur[1] >= B){
+                q.offer(new int[] { cur[0] + cur[1] - B, B, cur[2] });
+            }else{
+                q.offer(new int[] { 0, cur[0] + cur[1], cur[2] });
+            }
+            if(cur[0] + cur[2] >= C){
+                q.offer(new int[] { cur[0] + cur[2] - C, cur[1], C });
+            }else{
+                q.offer(new int[] { 0, cur[1], cur[2] + cur[0] });
+            }
+        }
     }
 }
+
