@@ -1,9 +1,7 @@
 import java.io.*;
 import java.util.*;
-
-public class Main {
-
-    public static void main(String[] args) throws IOException {
+public class Main{
+    public static void main(String[] args) throws IOException{
         Solution sol = new Solution();
         sol.solution();
     }
@@ -11,58 +9,86 @@ public class Main {
 
 class Solution {
 
-    public String s;
-    public int K;
+   
+    long N;
+    int K;
 
     public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        
-
-        long n = Long.parseLong(st.nextToken()) + 1;
+        N = Long.parseLong(st.nextToken()) + 1;
         K = Integer.parseInt(st.nextToken());
-        s = String.valueOf(n);
-        
-        long[] arr = new long[s.length() + 1];
-        for(int i = 1; i < arr.length; i ++){
-            arr[i] = s.charAt(i - 1) - '0';
-        }
-
-        change(arr);
-        for(int i = 0; i < K - arr.length; i ++){
-            System.out.print(5);
-        }
-        for(int i = 0; i < arr.length; i ++){
-            if(i == 0 && arr[0] == 0) continue;
-            System.out.print(arr[i]);
-        }
-    }
-
-    public void change(long[] arr){
-        for(int i = arr.length - 1; i >= 0; i --){
-            if(count(arr) >= K) break;
-            if(arr[i] > 5){
+      
+        int[] arr = initArr();
+        if(getCount(arr)){
+            System.out.println(getString(arr));
+            return;
+        }else{
+            for(int i = arr.length - 1; i >= 0; i --){
+                if(arr[i] > 5){
+                    arr[i - 1] ++;
+                    for(int j = i - 1; j > 0; j --){
+                        if(arr[j] >= 10){
+                            arr[j] %= 10;
+                            arr[j - 1] ++;
+                        }else{
+                            break;
+                        }
+                    }
+                }
                 arr[i] = 0;
-                arr[i - 1] ++;
-                int j = i - 1;
-                while(j > 0 && arr[j] >= 10){
-                    arr[j] %= 10;
-                    arr[j - 1] ++;
-                    j --;
+                if(getCount(arr)){
+                    System.out.println(getString(arr));
+                    return;
+                }
+                arr[i] = 5;
+                if(getCount(arr)){
+                    System.out.println(getString(arr));
+                    return;
                 }
             }
-            if(count(arr) >= K) break;
-            arr[i] = 5;
         }
     }
 
-    public int count(long[] arr){
+    public String getString(int[] arr){
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < arr.length; i ++){
+            if(i == 0 && arr[0] == 0){
+                continue;
+            }else{
+                sb.append(arr[i]);
+            }
+        }
+
+        return sb.toString();
+    }
+    public boolean getCount(int[] arr){
         int cnt = 0;
-        for(int k = 0; k < arr.length; k ++){
-            if(arr[k] == 5){
+        for(int i = 0; i < arr.length; i ++){
+            if(arr[i] == 5){
                 cnt ++;
             }
         }
-        return cnt;
+        return cnt >= K;
+    }
+
+    public int[] initArr(){
+        long tmp = N;
+        int len = 0;
+        while(tmp > 0){
+            tmp /= 10;
+            len ++;
+        }
+
+        tmp = N;
+        len = Math.max(K, len);
+        int[] arr = new int[len + 1];
+        for(int i = len; i >= 0 && tmp > 0; i --){
+            arr[i] = (int)(tmp % 10);
+            tmp /= 10;
+        }
+
+        return arr;
     }
 }
+
