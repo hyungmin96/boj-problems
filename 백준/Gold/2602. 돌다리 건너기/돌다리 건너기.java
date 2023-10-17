@@ -1,63 +1,59 @@
 import java.io.*;
 import java.util.*;
+public class Main{
+    public static void main(String[] args) throws IOException{
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
 
-public class Main {
+class Solution {
 
-    static int N;
-    static int[][] dp;
-    static char[][] arr;
-    static String seq;
+    String s, s1, s2;
 
-    public static void main(String[] args) throws IOException {
+    public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        seq = br.readLine();
-        String str1 = br.readLine();
-        String str2 = br.readLine();
 
-        N = seq.length();
+        s = br.readLine();
+        s1 = br.readLine();
+        s2 = br.readLine();
 
-        dp = new int[N + 1][str1.length() + 1];
-        arr = new char[2][str1.length()];
+        int[][][] dp = new int[2][s.length() + 1][s1.length() + 1];
+        for(int i = 0; i < 2; i ++)
+            for(int j = 0; j < s.length(); j ++)
+                Arrays.fill(dp[i][j], -1);
 
-        arr[0] = str1.toCharArray();
-        arr[1] = str2.toCharArray();
+        int angel = dfs(0, 0, 0, dp);
+        int devil = dfs(0, 0, 1, dp);
 
-        for (int i = 0; i < N; i++)
-            Arrays.fill(dp[i], -1);
-
-        int answer = 0;
-        answer += dfs(0, 0, 0);
-
-        for (int i = 0; i < N; i++)
-            Arrays.fill(dp[i], -1);
-
-        answer += dfs(0, 0, 1);
-
-        System.out.println(answer);
+        System.out.println(angel + devil);
     }
 
-    /*
-     * @param depth seq(두루마리) 현재 인덱스
-     * 
-     * @param idx arr[문자열] 현재 인덱스
-     * 
-     * @param flag 천사의 다리, 악마의 다리
-     */
-    public static int dfs(int depth, int idx, int flag) {
-        if (depth == N)
+    public int dfs(int depth, int idx, int flag, int[][][] dp){
+        if(depth == s.length()){
             return 1;
-        if (dp[depth][idx] != -1)
-            return dp[depth][idx];
-        if (idx >= arr[0].length || depth > N)
-            return 0;
+        }
 
-        dp[depth][idx] = 0;
-        for (int i = idx; i < arr[0].length; i++) {
-            if (arr[flag][i] == seq.charAt(depth)) {
-                dp[depth][idx] += dfs(depth + 1, i + 1, (flag + 1) % 2);
+        if(dp[flag][depth][idx] != -1){
+            return dp[flag][depth][idx];
+        }
+
+        dp[flag][depth][idx] = 0;
+        if(flag == 0){
+            for(int i = idx; i < s1.length(); i ++){
+                if(s.charAt(depth) == s1.charAt(i)){
+                    dp[flag][depth][idx] += dfs(depth + 1, i + 1, 1, dp);
+                }
+            }
+        }else{
+            for(int i = idx; i < s2.length(); i ++){
+                if(s.charAt(depth) == s2.charAt(i)){
+                    dp[flag][depth][idx] += dfs(depth + 1, i + 1, 0, dp);
+                }
             }
         }
 
-        return dp[depth][idx];
+        return dp[flag][depth][idx];
     }
 }
+
