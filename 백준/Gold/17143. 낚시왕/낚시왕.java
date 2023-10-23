@@ -1,9 +1,7 @@
 import java.io.*;
 import java.util.*;
-
-public class Main {
-
-    public static void main(String[] args) throws IOException {
+public class Main{
+    public static void main(String[] args) throws IOException{
         Solution sol = new Solution();
         sol.solution();
     }
@@ -11,125 +9,134 @@ public class Main {
 
 class Solution {
 
-    public class Shark {
-        int idx, r, c, s, d, z;
-
-        public Shark(int idx, int r, int c, int s, int d, int z) {
-            this.idx = idx;
+    public class Shark{
+        int r, c, s, d, z;
+        public Shark(int r, int c, int s, int d, int z){
             this.r = r;
             this.c = c;
-            this.s = s; // 속도
-            this.d = d; // 방향
-            this.z = z; // 크기
+            this.s = s;
+            this.d = d;
+            this.z = z;
         }
-    }
-
-    public int R, C, M;
-    public int[][] dirs = {
-            { -1, 0 },
-            { 1, 0 },
-            { 0, 1 },
-            { 0, -1 }
-    };
-    public ArrayList<Integer>[][] map;
-    public HashMap<Integer, Shark> sharks = new HashMap<>();
-
-    public void solution() throws IOException {
+    }    
+    
+    int N, M, K, answer = 0;
+    int[][] map, dirs = {{-1, 0},{1,0},{0,1},{0,-1}};
+    HashMap<Integer, Shark> hm = new HashMap<>();
+    
+    public void solution() throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-
-        R = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
-        map = new ArrayList[R][C];
-
-        for (int i = 0; i < R; i++)
-            for (int j = 0; j < C; j++)
-                map[i][j] = new ArrayList<>();
-
-        for (int i = 0; i < M; i++) {
+        K = Integer.parseInt(st.nextToken());
+        map = new int[N][M];
+        
+        for(int i = 0; i < K; i ++){
             st = new StringTokenizer(br.readLine(), " ");
-
             int r = Integer.parseInt(st.nextToken()) - 1;
             int c = Integer.parseInt(st.nextToken()) - 1;
             int s = Integer.parseInt(st.nextToken());
             int d = Integer.parseInt(st.nextToken()) - 1;
             int z = Integer.parseInt(st.nextToken());
-
-            map[r][c].add(z);
-            sharks.put(z, new Shark(z, r, c, s, d, z));
+            
+            map[r][c] = z;
+            hm.put(z, new Shark(r, c, s, d, z));
+        }
+        
+        for(int i = 0; i < M; i ++){
+            fishing(i);
+            move();
+            //System.out.println("=================");
         }
 
-        solve();
-    }
-
-    public void move(Shark s) {
-        int tmp_s = s.s;
-        if(s.d == 0 || s.d == 1){
-            tmp_s = s.s % (2 * (R - 1));
-        }else{
-            tmp_s = s.s % (2 * (C - 1));
-        }
-
-        if(tmp_s == 0){
-            s.d = (s.d == 0) ? 1 : (s.d == 1) ? 0 : (s.d == 2) ? 3 : 2;
-        }
-
-        while(tmp_s -- > 0){
-            int nr = s.r + dirs[s.d][0];
-            int nc = s.c + dirs[s.d][1];
-
-            if(nr < 0 || nc < 0 || nr >= R || nc >= C){
-                s.d = (s.d == 0) ? 1 : (s.d == 1) ? 0 : (s.d == 2) ? 3 : 2;
-                
-                nr = s.r + dirs[s.d][0];
-                nc = s.c + dirs[s.d][1];
-            }
-
-            s.r = nr;
-            s.c = nc;
-        }
-    }
-
-    public void solve(){
-        long answer = 0;
-        for (int i = 0; i < C; i++) {
-            for (int r = 0; r < R; r++) {
-                if (map[r][i].size() > 0) {
-                    Shark s = sharks.get(map[r][i].get(0));
-                    answer += s.z;
-                    sharks.remove(map[r][i].get(0));
-                    map[r][i].clear();
-                    break;
-                }
-            }
-
-            for (int k = 0; k < R; k ++)
-                for (int j = 0; j < C; j++)
-                    map[k][j].clear();
-
-            for (int k : sharks.keySet()) {
-                Shark s = sharks.get(k);
-                move(s);
-                map[s.r][s.c].add(k);
-            }
-
-            for (int r = 0; r < R; r++) {
-                for (int c = 0; c < C; c++) {
-                    if (map[r][c].size() > 1) {
-                        Collections.sort(map[r][c]);
-
-                        int size = map[r][c].get(map[r][c].size() - 1);
-                        for (int k = 0; k < map[r][c].size() - 1; k ++)
-                            if(sharks.containsKey(map[r][c].get(k)))
-                                sharks.remove(map[r][c].get(k));
-
-                        map[r][c].clear();
-                        map[r][c].add(size);
-                    }
-                }
-            }
-        }
         System.out.println(answer);
     }
+    
+    public void move(){
+        int[][] tmp = new int[N][M + 1];
+        ArrayList<Integer> remove_list = new ArrayList<>();
+        for(int key : hm.keySet()){
+            Shark shk = hm.get(key);
+            map[shk.r][shk.c] = 0;
+            cal(shk);
+
+            if(tmp[shk.r][shk.c] == 0){
+                tmp[shk.r][shk.c] = shk.z;
+            }else{
+                int remove_size = shk.z;
+                if(tmp[shk.r][shk.c] < shk.z){
+                    //System.out.println(tmp[shk.r][shk.c] + " shark is eaten by " + shk.z);
+                    remove_size = tmp[shk.r][shk.c];
+                    tmp[shk.r][shk.c] = shk.z;
+                }
+                remove_list.add(remove_size);
+            }
+        }
+
+        for(int z : remove_list){
+            hm.remove(z);
+        }
+
+        for(int key : hm.keySet()){
+            Shark shk = hm.get(key);
+            map[shk.r][shk.c] = shk.z;
+            //System.out.println(key + "'shark': " + (shk.r + 1) + ", " + (shk.c + 1) + ", " + shk.d);
+        }
+    }
+
+    public void fishing(int c){
+        for(int i = 0; i < N; i ++){
+            if(map[i][c] > 0){
+                //System.out.println("catch " + map[i][c]);
+                answer += hm.get(map[i][c]).z;
+                hm.remove(map[i][c]);
+                break;
+            }
+        }
+    }
+
+    public int[] cal(Shark s){
+        if(s.d == 0 || s.d == 1){
+            s.s %= 2 * (N - 1);
+            int des = (s.r + (s.s * dirs[s.d][0])) % (2 * (N - 1));
+            if(des < 0){
+                if(Math.abs(des) < N){
+                    s.d = (s.d + 1) % 2;
+                    s.r = Math.abs(des);
+                }else{
+                    s.r = (N - 1) - (Math.abs(des) % (N - 1));
+                    //System.out.println();
+                }
+            }else{
+                if(des < N){
+                    s.r = des;
+                }else{
+                    s.d = (s.d + 1) % 2;
+                    s.r = (N - 1) - (Math.abs(des) % (N - 1));
+                }
+            }
+        }else{
+            s.s %= 2 * (M - 1);
+            int des = (s.c + (s.s * dirs[s.d][1])) % (2 * (M - 1));
+            if(des < 0){
+                if(Math.abs(des) < M){
+                    s.d = ((s.d + 1) % 2) + 2;
+                    s.c = Math.abs(des);
+                }else{
+                    s.c = (M - 1) - (Math.abs(des) % (M - 1));
+                }
+            }else{
+                if(des < M){
+                    s.c = des;
+                }else{
+                    s.d = ((s.d + 1) % 2) + 2;
+                    s.c = (M - 1) - (Math.abs(des) % (M - 1));
+                }
+            }
+        }
+
+        return new int[] { s.r, s.c };
+    }
 }
+
