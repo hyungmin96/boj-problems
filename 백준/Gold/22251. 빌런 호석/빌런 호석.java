@@ -6,21 +6,21 @@ public class Main{
         sol.solution();
     }
 }
-    
-class Solution{
 
-    int N, P, K, X;
-    final boolean[][] digit = {
-        { true, true, true, false, true, true, true },
-        { false, false, false, false, false, true, true },
-        { false, true, true, true, true, true, false },
-        { false, false, true, true, true, true, true },
-        { true, false, false, true, false, true, true },
-        { true, false, true, true, true, false, true },
-        { true, true, true, true, true, false, true },
-        { false, false, true, false, false, true, true },
-        { true, true, true, true, true, true, true },
-        { true, false, true, true, true, true, true }
+class Solution {
+    
+    int N, K, P, X;
+    boolean[][] digit = {
+        {true, true, true, false, true, true, true},
+        {false, false,false, false,false, true, true},
+        {false, true, true, true, true, true, false},
+        {false, false, true, true, true, true, true},
+        {true, false, false, true, false, true, true},
+        {true, false, true, true, true, false, true},
+        {true, true, true, true, true, false, true},
+        {false, false, true, false, false, true, true},
+        {true, true, true, true, true, true, true},
+        {true, false, true, true, true, true, true},
     };
 
     public void solution() throws IOException{
@@ -32,42 +32,36 @@ class Solution{
         P = Integer.parseInt(st.nextToken());
         X = Integer.parseInt(st.nextToken());
 
-        
-        int idx = 0;
+      int[] arr = new int[K];
         int tmp = X;
-        int mod = (int)Math.pow(10, K - 1);
-        int[] arr = new int[K];
-        while(idx < K){
-            arr[idx ++] = tmp / mod;
-            if(X / mod > 0){
-                tmp %= mod;
-            }
-            mod /= 10;
+        for(int i = 0; i < K; i ++){
+            arr[K - i - 1] = tmp % 10;
+            tmp /= 10;
         }
-        
-        System.out.println(dfs(0, P, 0, arr));
+        System.out.println(dfs(0, 0, P, arr));
     }
 
-    public int dfs(int depth, int p, int cur_floor, int[] arr){
-        if(depth == K && cur_floor >= 1 && cur_floor <= N){
-            if(cur_floor == X) return 0;
+    public int dfs(int depth, long cur, int cnt, int[] arr){
+        if(depth == K && cur >= 1 && cur <= N){
+            if(cur == X) return 0;
             return 1;
         }
-
         if(depth == K) return 0;
 
         int ret = 0;
-        int cur_num = arr[depth];
         for(int i = 0; i < 10; i ++){
-            int diff_cnt = 0;
+            int change_cnt = 0;
             for(int j = 0; j < 7; j ++){
-                if(digit[i][j] != digit[cur_num][j]){
-                    diff_cnt ++;
+                if(digit[arr[depth]][j] != digit[i][j]){
+                    change_cnt ++;
                 }
             }
-            if(diff_cnt > p) continue;
-            ret += dfs(depth + 1, p - diff_cnt, cur_floor * 10 + i, arr);
+
+            if(cnt - change_cnt >= 0){
+                ret += dfs(depth + 1, cur * 10 + i, cnt - change_cnt, arr);
+            }
         }
         return ret;
     }
 }
+
