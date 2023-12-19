@@ -2,7 +2,6 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-
     public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
@@ -11,129 +10,102 @@ public class Main {
 
 class Solution {
 
-    public int R, C;
-    public int[] player;
-    public int[][] map;
-    public int[][] dirs = {
-        { 1, -1 },
-        { 1, 0 },
-        { 1, 1 },
-        { 0, -1 },
-        { 0, 0 },
-        { 0, 1 },
-        { -1, -1 },
-        { -1, 0 },
-        { -1, 1 },
-    };
-    public HashMap<Integer, int[]> arduino = new HashMap<>();
+    int N, M;
+    int[] pos = new int[2];
+    int[][] map, dirs = {{1,-1},{1,0},{1,1},{0,-1},{0,0},{0,1},{-1,-1},{-1,0},{-1,1}};
 
-    public void solution() throws IOException{
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        
-        R = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
-        map = new int[R][C];
 
-        for(int r = 0; r < R; r ++){
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        map = new int[N][M];
+        int answer = 0;
+
+        for(int i = 0; i < N; i ++){
             String str = br.readLine();
-            for(int c = 0; c < C; c ++){
-                char ch = str.charAt(c);
-                if(ch == 'R'){
-                    map[r][c] = 1;
-                    arduino.put(arduino.size() + 1, new int[] { r, c });
-                }else if(ch == 'I'){
-                    player = new int[] { r, c };
-                }else{
-                    map[r][c] = 0;
+            for(int j = 0; j < M; j ++){
+                char c = str.charAt(j);
+                if(c == 'I'){
+                    pos = new int[] { i, j };
+                }else if(c == 'R'){
+                    map[i][j] ++;
                 }
             }
         }
 
-        int cnt = 0;
-        String d = br.readLine();
-        for(int i = 0; i < d.length(); i ++){
-            cnt ++;
-            movePlayer(d.charAt(i));
-            if(map[player[0]][player[1]] > 0){
-                break;
-            }
-            moveArduino();
-            if(map[player[0]][player[1]] > 0){
-                break;
-            }
-            putArduino();
-        }
-
-        if(cnt == d.length()){
-            for(int r = 0; r < R; r ++){
-                for(int c = 0; c < C; c ++){
-                    if(r == player[0] && c == player[1])
-                        System.out.print("I");
-                    else if(map[r][c] > 0)
-                        System.out.print("R");
-                    else
-                        System.out.print(".");
-                }
-                System.out.println();
-            }
-        }else{
-            System.out.println("kraj " + cnt);
-        }
-    }
-
-    public void putArduino(){
-        arduino.clear();
-        for(int r = 0; r < R; r ++){
-            for(int c = 0; c < C; c ++){
-                if(map[r][c] == 1){
-                    arduino.put(arduino.size() + 1, new int[] { r, c });
-                }else{
-                    map[r][c] = 0;
-                }
-            }
-        }
-    }
-
-    public void moveArduino(){
-        for(int k : arduino.keySet()){
-            int dist = 987654321;
-            int[] cur = arduino.get(k);
-            int tmp_nr = -1, tmp_nc = -1;
-            for(int d = 0; d < 9; d ++){
-                int nr = cur[0] + dirs[d][0];
-                int nc = cur[1] + dirs[d][1];
-                if(oob(nr, nc)) continue;
-                int tmp = Math.abs(nr - player[0]) + Math.abs(nc - player[1]);
-                if(dist > tmp){
-                    dist = tmp;
-                    tmp_nr = nr;
-                    tmp_nc = nc;
-                }
-            }
-
-            map[cur[0]][cur[1]] --;
-            map[tmp_nr][tmp_nc] ++;
-            if(tmp_nr == player[0] && tmp_nc == player[1]){
+        String commands = br.readLine();
+        for(char c : commands.toCharArray()){
+            answer ++;
+            int d = c - '0' - 1;
+            pos[0] += dirs[d][0];
+            pos[1] += dirs[d][1];
+            if(map[pos[0]][pos[1]] > 0){
+                System.out.println("kraj " + answer);
                 return;
             }
+
+            int[][] tmp = new int[N][M];
+            ArrayList<int[]> explode = new ArrayList<>();
+            for(int i = 0; i < N; i ++){
+                for(int j = 0; j < M; j ++){
+                    if(map[i][j] > 0){
+                        map[i][j] = 0;
+                        int cur_d = -1;
+                        int min_dist = 987654321;
+                        for(int d1 = 0; d1 < 9; d1 ++){
+                            int nr = i + dirs[d1][0];
+                            int nc = j + dirs[d1][1];
+                            
+                            int dist = Math.abs(nr - pos[0]) + Math.abs(nc - pos[1]);
+                            if(min_dist > dist){
+                                min_dist = dist;
+                                cur_d = d1;
+                            }
+                        }
+
+                        if(pos[0] == i + dirs[cur_d][0] && pos[1] == j + dirs[cur_d][1]){
+                            System.out.println("kraj " + answer);
+                            return;
+                        }
+                        tmp[i + dirs[cur_d][0]][j + dirs[cur_d][1]] ++;
+                        if(tmp[i + dirs[cur_d][0]][j + dirs[cur_d][1]] > 1){
+                            explode.add(new int[] { i + dirs[cur_d][0], j + dirs[cur_d][1]});
+                        }
+                    }
+                }
+            }
+
+            for(int[] p : explode){
+                tmp[p[0]][p[1]] = 0;
+            }
+
+            for(int i = 0; i < N; i ++){
+                for(int j = 0; j < M; j ++){
+                    if(tmp[i][j] > 0){
+                        map[i][j] = tmp[i][j];
+                    }
+                }
+            }
         }
-    }
 
-    public void movePlayer(char c){
-        int nd = c - '0' - 1;
-        int nr = player[0] + dirs[nd][0];
-        int nc = player[1] + dirs[nd][1];
-        if(oob(nr, nc)) return;
-        player[0] = nr;
-        player[1] = nc;
-
-        if(map[nr][nc] > 0){
-            return;
+        StringBuilder sb = new StringBuilder();
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < M; c ++){
+                if(r == pos[0] && c == pos[1]){
+                    sb.append("I");
+                }else{
+                    if(map[r][c] > 0){
+                        sb.append("R");
+                    }else{
+                        sb.append(".");
+                    }
+                }
+            }
+            sb.append("\n");
         }
-    }
 
-    public boolean oob(int r, int c){
-        return (r < 0 || c < 0 || r >= R || c >= C);
+        System.out.println(sb.toString());
     }
 }
