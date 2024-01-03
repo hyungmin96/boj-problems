@@ -30,8 +30,7 @@ class Solution {
                     next_tmp --;
                 }
 
-                if(next_tmp >= 0)
-                    dp[next_tmp][i + 1] = Math.min(dp[next_tmp][i + 1], dp[j][i]);
+                dp[next_tmp][i + 1] = Math.min(dp[next_tmp][i + 1], dp[j][i]);
             }
         }
         

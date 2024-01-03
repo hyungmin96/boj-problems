@@ -1,10 +1,10 @@
 # [level 3] 에어컨 - 214289 
 
-[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/214289) 
+[문제 링크](https://school.programmers.co.kr/learn/courses/30/lessons/214289#qna) 
 
 ### 성능 요약
 
-메모리: 76.7 MB, 시간: 11.56 ms
+메모리: 88.7 MB, 시간: 12.01 ms
 
 ### 구분
 
@@ -16,7 +16,7 @@
 
 ### 제출 일자
 
-2024년 1월 3일 16:56:17
+2024년 1월 3일 17:9:33
 
 ### 문제 설명
 
