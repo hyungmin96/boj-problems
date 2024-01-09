@@ -1,8 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
+class Main {
     public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
@@ -11,19 +10,12 @@ public class Main {
 
 class Solution {
 
-    int N, answer = 0;
-    int[][] dirs = {
-        { -1, 0 },
-        { 0, 1 },
-        { 1, 0 },
-        { 0, -1 }
-    };
-    int[][] map;
+    int N, answer = -1;
 
-    public void solution() throws IOException{
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-        map = new int[N][N];
+        int[][] map = new int[N][N];
 
         for(int i = 0; i < N; i ++){
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
@@ -33,115 +25,149 @@ class Solution {
             }
         }
 
-        dfs(0, new int[5]);
+        dfs(0, map);
         System.out.println(answer);
     }
 
-    public void move(int d){
-        int min_r, max_r, min_c, max_c;
+    public void move(int d, int[][] tmp){
         switch(d){
             case 0:
-                for(int c = 0; c < N; c ++){
-                    min_r = 0;
-                    for(int r = 0; r < N; r ++){
-                        if(map[r][c] == 0) continue;
-                        int cur_r = r;
-                        int cur_num = map[r][c];
-                        map[r][c] = 0;
-                        while(cur_r - 1 >= 0 && cur_r - 1 >= min_r && (map[cur_r - 1][c] == cur_num || map[cur_r - 1][c] == 0)){
-                            cur_r --;
-                        }
-
-                        if(r != cur_r && map[cur_r][c] == cur_num){
-                            map[cur_r][c] = cur_num + cur_num;
-                            answer = Math.max(answer, cur_num + cur_num);
-                            min_r = cur_r + 1;
-                        }else{
-                            map[cur_r][c] = cur_num;
-                        }
-                    }
-                }
+                up(tmp);
                 break;
             case 1:
-                for(int r = 0; r < N; r ++){
-                    max_c = N - 1;
-                    for(int c = N - 1; c >= 0; c --){
-                        if(map[r][c] == 0) continue;
-                        int cur_c = c;
-                        int cur_num = map[r][c];
-                        map[r][c] = 0;
-                        while(cur_c + 1 < N && cur_c + 1 <= max_c && (map[r][cur_c + 1] == cur_num || map[r][cur_c + 1] == 0)){
-                            cur_c ++;
-                        }
-
-                        if(c != cur_c && map[r][cur_c] == cur_num){
-                            map[r][cur_c] = cur_num + cur_num;
-                            answer = Math.max(answer, cur_num + cur_num);
-                            max_c = cur_c - 1;
-                        }else{
-                            map[r][cur_c] = cur_num;
-                        }
-                    }
-                }
+                right(tmp);
                 break;
             case 2:
-                for(int c = 0; c < N; c ++){
-                    max_r = N - 1;
-                    for(int r = N - 1; r >= 0; r --){
-                        if(map[r][c] == 0) continue;
-                        int cur_r = r;
-                        int cur_num = map[r][c];
-                        map[r][c] = 0;
-                        while(cur_r + 1 < N && cur_r + 1 <= max_r && (map[cur_r + 1][c] == cur_num || map[cur_r + 1][c] == 0)){
-                            cur_r ++;
-                        }
-
-                        if(r != cur_r && map[cur_r][c] == cur_num){
-                            map[cur_r][c] = cur_num + cur_num;
-                            answer = Math.max(answer, cur_num + cur_num);
-                            max_r = cur_r - 1;
-                        }else{
-                            map[cur_r][c] = cur_num;
-                        }
-                    }
-                }
+                down(tmp);
                 break;
             case 3:
-                for(int r = 0; r < N; r ++){
-                    min_c = 0;
-                    for(int c = 0; c < N; c ++){
-                        if(map[r][c] == 0) continue;
-                        int cur_c = c;
-                        int cur_num = map[r][c];
-                        map[r][c] = 0;
-                        while(cur_c - 1 >= 0 && cur_c - 1 >= min_c && (map[r][cur_c - 1] == cur_num || map[r][cur_c - 1] == 0)){
-                            cur_c --;
-                        }
-
-                        if(c != cur_c && map[r][cur_c] == cur_num){
-                            map[r][cur_c] = cur_num + cur_num;
-                            answer = Math.max(answer, cur_num + cur_num);
-                            min_c = cur_c + 1;
-                        }else{
-                            map[r][cur_c] = cur_num;
-                        }
-                    }
-                }
+                left(tmp);
                 break;
         }
     }
 
-    public void dfs(int depth, int[] arr){
+    public void right(int[][] map){
+        for(int row = 0; row < N; row ++){
+            int col = N - 1;
+            for(int i = col - 1; i >= 0; i --){
+                if(map[row][i] == 0) continue;
+                for(int j = i; j < col; j ++){
+                    if(map[row][j] == 0) continue;
+                    if(map[row][col] == map[row][j]){
+                        // 동일한 숫자일 경우
+                        map[row][col] *= 2;
+                        answer = Math.max(answer, map[row][col]);
+                        map[row][j] = 0;
+                        col --;
+                    }else if(map[row][col] != map[row][j]){
+                        // 다른 숫자일 경우
+                        if(map[row][col] > 0){
+                            col --;
+                        }
+                        int tmp = map[row][j];
+                        map[row][j] = 0;
+                        map[row][col] = tmp;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void left(int[][] map){
+        for(int row = 0; row < N; row ++){
+            int col = 0;
+            for(int i = col + 1; i < N; i ++){
+                if(map[row][i] == 0) continue;
+                for(int j = i; j > col; j --){
+                    if(map[row][j] == 0) continue;
+                    if(map[row][col] == map[row][j]){
+                        // 동일한 숫자일 경우
+                        map[row][col] *= 2;
+                        answer = Math.max(answer, map[row][col]);
+                        map[row][j] = 0;
+                        col ++;
+                    }else if(map[row][col] != map[row][j]){
+                        // 다른 숫자일 경우
+                        if(map[row][col] > 0){
+                            col ++;
+                        }
+                        int tmp = map[row][j];
+                        map[row][j] = 0;
+                        map[row][col] = tmp;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void down(int[][] map){
+        for(int col = 0; col < N; col ++){
+            int row = N - 1;
+            for(int i = row - 1; i >= 0; i --){
+                if(map[i][col] == 0) continue;
+                for(int j = i; j < row; j ++){
+                    if(map[j][col] == 0) continue;
+                    if(map[row][col] == map[j][col]){
+                        // 동일한 숫자일 경우
+                        map[row][col] *= 2;
+                        answer = Math.max(answer, map[row][col]);
+                        map[j][col] = 0;
+                        row --;
+                    }else if(map[row][col] != map[j][col]){
+                        // 다른 숫자일 경우
+                        if(map[row][col] > 0){
+                            row --;
+                        }
+                        int tmp = map[j][col];
+                        map[j][col] = 0;
+                        map[row][col] = tmp;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void up(int[][] map){
+        for(int col = 0; col < N; col ++){
+            int row = 0;
+            for(int i = row + 1; i < N; i ++){
+                if(map[i][col] == 0) continue;
+                for(int j = i; j > row; j --){
+                    if(map[j][col] == 0) continue;
+                    if(map[row][col] == map[j][col]){
+                        // 동일한 숫자일 경우
+                        map[row][col] *= 2;
+                        answer = Math.max(answer, map[row][col]);
+                        map[j][col] = 0;
+                        row ++;
+                    }else if(map[row][col] != map[j][col]){
+                        // 다른 숫자일 경우
+                        if(map[row][col] > 0){
+                            row ++;
+                        }
+                        int tmp = map[j][col];
+                        map[j][col] = 0;
+                        map[row][col] = tmp;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public void dfs(int depth, int[][] map){
         if(depth == 5){
             return;
         }
-
-        for(int i = 0; i < 4; i ++){
+        for(int d = 0; d < 4; d ++){
             int[][] tmp = copy(map);
-            move(i);
-            arr[depth] = i;
-            dfs(depth + 1, arr);
-            map = copy(tmp);
+            move(d, tmp);
+            dfs(depth + 1, tmp);
+            tmp = new int[N][N];
+            tmp = copy(map);
         }
     }
 
@@ -152,6 +178,7 @@ class Solution {
                 tmp[r][c] = map[r][c];
             }
         }
+
         return tmp;
     }
 }
