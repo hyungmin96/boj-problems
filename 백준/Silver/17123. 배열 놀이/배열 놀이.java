@@ -1,60 +1,73 @@
 import java.io.*;
 import java.util.*;
 
-
-public class Main {
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    StringBuilder sb = new StringBuilder();
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
         int tc = Integer.parseInt(br.readLine());
+
         for(int i = 0; i < tc; i ++){
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
             int n = Integer.parseInt(st.nextToken());
             int m = Integer.parseInt(st.nextToken());
 
-            int[][] arr = new int[n][n];
-            int[] row = new int[n];
-            int[] col = new int[n];
+            // 0 : row
+            // 1 : col
+            int[][] cur = new int[2][n];
+            int[][] sum = new int[2][n];
+
+            int[][] map = new int[n][n];
+
             for(int j = 0; j < n; j ++){
-                st = new StringTokenizer(br.readLine());
+                st = new StringTokenizer(br.readLine(), " ");
                 for(int k = 0; k < n; k ++){
-                    int num = Integer.parseInt(st.nextToken());
-                    arr[j][k] = num;
-                    col[k] += num;
-                    row[j] += num;
+                    map[j][k] = Integer.parseInt(st.nextToken());
+                    
+                    cur[0][j] += map[j][k];
+                    cur[1][k] += map[j][k];
                 }
             }
-
+            
             for(int j = 0; j < m; j ++){
-                st = new StringTokenizer(br.readLine());
+                st = new StringTokenizer(br.readLine(), " ");
+
                 int r1 = Integer.parseInt(st.nextToken()) - 1;
                 int c1 = Integer.parseInt(st.nextToken()) - 1;
                 int r2 = Integer.parseInt(st.nextToken()) - 1;
                 int c2 = Integer.parseInt(st.nextToken()) - 1;
                 int v = Integer.parseInt(st.nextToken());
 
-                for(int r = r1; r <= r2; r ++){
-                    row[r] += ((c2 - c1) + 1) * v;
+                for(int k = r1; k <= r2; k ++){
+                    sum[0][k] += (c2 - c1 + 1) * v;
                 }
 
-                for(int c = c1; c <= c2; c ++){
-                    col[c] += ((r2 - r1) + 1) * v;
+                for(int k = c1; k <= c2; k ++){
+                    sum[1][k] += (r2 - r1 + 1) * v;
                 }
             }
-            
-            for(int j = 0; j < n; j ++){
-                sb.append(row[j] + " ");
-            }
-            sb.append("\n");
 
-            for(int j = 0; j < n; j ++){
-                sb.append(col[j] + " ");
+            for(int j = n - 1; j >= 0; j --){
+                cur[0][j] += sum[0][j];
+                cur[1][j] += sum[1][j];
             }
-            sb.append("\n");
 
+            for(int k = 0; k < 2; k ++){
+                for(int j = 0; j < n; j ++){
+                    sb.append(cur[k][j] + " ");
+                }
+                sb.append("\n");
+            }
         }
-
         System.out.println(sb.toString());
     }
 }
