@@ -3,92 +3,83 @@ import java.util.*;
 
 public class Main {
 
-    static int N, M, W;
-    static ArrayList<int[]>[] vertex;
-    static int[] dis;
-
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
-        int tc = Integer.parseInt(br.readLine());
-        for(int i = 0; i < tc; i ++){
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            N = Integer.parseInt(st.nextToken());
-            M = Integer.parseInt(st.nextToken());
-            W = Integer.parseInt(st.nextToken());
-
-            dis = new int[N + 1];
-            vertex = new ArrayList[N + 1];
-
-            for(int j = 1; j <= N; j ++) vertex[j] = new ArrayList<>();
-            for(int j = 0; j < M; j ++){
-                st = new StringTokenizer(br.readLine(), " ");
-                int start = Integer.parseInt(st.nextToken());
-                int end = Integer.parseInt(st.nextToken());
-                int cost = Integer.parseInt(st.nextToken());
-
-                vertex[start].add(new int[] { end, cost });
-                vertex[end].add(new int[] { start, cost });
-            }
-
-            for(int j = 0; j < W; j ++){
-                st = new StringTokenizer(br.readLine(), " ");
-                int start = Integer.parseInt(st.nextToken());
-                int end = Integer.parseInt(st.nextToken());
-                int cost = Integer.parseInt(st.nextToken());
-
-                vertex[start].add(new int[] { end, - cost });
-            }
-
-            boolean isCycle = false;
-            for(int k = 1; k <= N; k ++){
-                if(bellmanFord(k)){
-                    isCycle = true;
-                    sb.append("YES\n");
-                    break;
-                }
-            }
-
-            if(!isCycle){
-                sb.append("NO\n");
-            }
-        }
-        System.out.println(sb.toString());
-    }
-
-    public static boolean bellmanFord(int start){
-        Arrays.fill(dis, 987654321);
-        dis[start] = 0;
-        boolean isUpdate = false;
-        for(int i = 1; i < N; i ++){
-            isUpdate = false;
-            for(int j = 1; j <= N; j ++){
-                for(int[] cur : vertex[j]){
-                    int next = cur[0];
-                    int cost = cur[1];
-                    if(dis[j] != 987654321 && dis[next] > dis[j] + cost){
-                        dis[next] = dis[j] + cost;
-                        isUpdate = true;
-                    }
-                }
-            }
-
-            if(!isUpdate){
-                break;
-            }
-        }
-
-        if(isUpdate){
-            for(int i = 1; i <= N; i ++){
-                for(int[] cur : vertex[i]){
-                    int next = cur[0];
-                    int cost = cur[1];
-                    if(dis[i] != 987654321 && dis[next] > dis[i] + cost)
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
+	static int n, m, w, INF = 987654321;
+	static List<int[]>[] list;
+	static int[] dist;
+	public static void main(String[] args) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		int tc = Integer.parseInt(br.readLine());
+		StringBuilder sb = new StringBuilder();
+		while(tc-->0) {
+			StringTokenizer st = new StringTokenizer(br.readLine());
+			n = Integer.parseInt(st.nextToken());
+			m = Integer.parseInt(st.nextToken());
+			w = Integer.parseInt(st.nextToken());
+			
+			list = new ArrayList[n+1];
+			dist = new int[n+1];
+			for(int i=1; i<n+1; i++) {
+				list[i] = new ArrayList<>();
+			}
+			
+			for(int i=0; i<m+w; i++) {
+				st = new StringTokenizer(br.readLine());
+				int s = Integer.parseInt(st.nextToken());
+				int e = Integer.parseInt(st.nextToken());
+				int t = Integer.parseInt(st.nextToken());
+				
+				if(i > m-1) {
+					list[s].add(new int[] {e,-t});
+				}else {
+					list[s].add(new int[] {e,t});
+					list[e].add(new int[] {s,t});
+				}
+			}
+            
+			boolean f = false;
+			for(int i=1; i<=n; i++) {
+				if(bellmanford(i)) {
+					f = true;
+					break;
+				}
+			}
+			
+			if(f) {
+				sb.append("YES\n");
+			}else {
+				sb.append("NO\n");
+			}
+		}
+		System.out.println(sb.toString());
+	}
+	
+	static boolean bellmanford(int s) {
+		Arrays.fill(dist, INF);
+		dist[s] = 0;
+		
+		boolean isUpdated = false;
+		for(int i=0; i<n; i++) {
+			isUpdated = false;
+			for(int j=1; j<n+1; j++) {
+				int cur = j;
+				for(int[] route : list[j]) {
+					int nxt = route[0];
+					int cost = route[1];
+					
+					if(dist[cur] == INF) continue;
+					
+					if(dist[nxt] > dist[cur] + cost) {
+						dist[nxt] = dist[cur] + cost;
+						isUpdated = true;
+						if(i == n-1) {
+							return true;
+						}
+					}
+				}
+			}
+			
+			if(!isUpdated) break;
+		}
+		return false;
+	}
 }
