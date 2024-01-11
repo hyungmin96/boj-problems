@@ -4,11 +4,15 @@
 
 ### 성능 요약
 
-메모리: 119584 KB, 시간: 1604 ms
+메모리: 119928 KB, 시간: 1588 ms
 
 ### 분류
 
-깊이 우선 탐색(dfs), 그래프 이론(graphs), 그래프 탐색(graph_traversal), 트리(trees)
+깊이 우선 탐색, 그래프 이론, 그래프 탐색, 트리
+
+### 제출 일자
+
+2024년 1월 11일 16:39:53
 
 ### 문제 설명
 
@@ -24,15 +28,15 @@
 
 <p>기가 노드는 루트 노드에서 순회를 시작했을 때, 처음으로 자식 노드가 <mjx-container class="MathJax" jax="CHTML" style="font-size: 109%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mn>2</mn></math></mjx-assistive-mml><span aria-hidden="true" class="no-mathjax mjx-copytext">$2$</span></mjx-container>개 이상인 노드다. 기둥-가지를 줄여 기가 노드라 이름 붙였다. 위 그림에서 기가 노드는 <mjx-container class="MathJax" jax="CHTML" style="font-size: 109%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mn class="mjx-n"><mjx-c class="mjx-c34"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mn>4</mn></math></mjx-assistive-mml><span aria-hidden="true" class="no-mathjax mjx-copytext">$4$</span></mjx-container>번 노드다.</p>
 
-<p style="text-align: center;"><img alt="" height="400px" src="https://upload.acmicpc.net/a5e04b5d-e28b-4a9c-97ce-dd45f500b824/-/preview/"></p>
+<p style="text-align: center;"><img alt="" height="400px" src=""></p>
 
 <p>단, 위 그림과 같이 리프 노드가 단 <mjx-container class="MathJax" jax="CHTML" style="font-size: 109%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mn>1</mn></math></mjx-assistive-mml><span aria-hidden="true" class="no-mathjax mjx-copytext">$1$</span></mjx-container>개인 경우 리프 노드가 동시에 기가 노드가 된다.</p>
 
-<p style="text-align: center;"><img alt="" height="400px" src="https://upload.acmicpc.net/cc15e14f-82e2-4c5c-9dbc-7919b7b96649/-/preview/"></p>
+<p style="text-align: center;"><img alt="" height="400px" src=""></p>
 
 <p>또한, 위 그림과 같이 루트 노드가 동시에 기가 노드인 경우도 가능하다.</p>
 
-<p style="text-align: center;"><img alt="" height="400px" src="https://upload.acmicpc.net/1a596e90-2416-4c7e-aa8f-f8bdf035dbaa/-/preview/"><img alt="" height="400px" src="https://upload.acmicpc.net/86b4fbd7-b49b-4c58-9e10-a06d0365f8eb/-/preview/"></p>
+<p style="text-align: center;"><img alt="" height="400px" src=""><img alt="" height="400px" src=""></p>
 
 <ul>
 	<li>트리의 기둥은 루트 노드에서부터 기가 노드까지다. 위 그림에서 기둥은 <mjx-container class="MathJax" jax="CHTML" style="font-size: 109%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c34"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mn>1</mn><mo>−</mo><mn>2</mn><mo>−</mo><mn>3</mn><mo>−</mo><mn>4</mn></math></mjx-assistive-mml><span aria-hidden="true" class="no-mathjax mjx-copytext">$1-2-3-4$</span></mjx-container> 이다.<br>

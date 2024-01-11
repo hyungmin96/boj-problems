@@ -1,70 +1,71 @@
 import java.io.*;
 import java.util.*;
 
-
-public class Main {
-
-    static int answer = 0;
-    static ArrayList<int[]>[] vertex;
-    static boolean[] check;
-
+class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        int n = Integer.parseInt(st.nextToken());
-        int root = Integer.parseInt(st.nextToken());
-
-        check = new boolean[n + 1];
-        vertex = new ArrayList[n + 1];
-        for(int i = 1; i <= n; i ++) vertex[i] = new ArrayList<>();
-        for(int i = 0; i < n - 1; i ++){
-            st = new StringTokenizer(br.readLine(), " ");
-            int start = Integer.parseInt(st.nextToken());
-            int next = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
-
-            vertex[start].add(new int[] { next, cost });
-            vertex[next].add(new int[] { start, cost });
-        }
-
-        check[root] = true;
-        StringBuilder sb = new StringBuilder();
-        int[] giga_info = dfs(root, root, 0);
-        
-        if(giga_info[0] != -1){
-            find(giga_info[0], giga_info[0], 0);
-            sb.append(giga_info[1] + " " + answer);
-        }else
-            sb.append(giga_info[1] + " " + 0);
-
-        System.out.println(sb.toString());
-    }
-
-    public static void find(int root, int node, int cost){
-        if(root != node && vertex[node].size() == 1){
-            answer = Math.max(answer, cost);
-            return;
-        }
-        for(int[] next : vertex[node]){
-            if(check[next[0]]) continue;
-            check[next[0]] = true;
-            find(root, next[0], cost + next[1]);
-        }
-    }
-
-    public static int[] dfs(int root, int node, int cur){
-        int[] temp = { -1, cur };
-        if(vertex[node].size() >= 2 && root == node) 
-            return new int[] { node, 0 };
-
-        if(vertex[node].size() >= 3 && root != node) 
-            return new int[] { node, cur };
-
-        for(int[] next : vertex[node]){
-            if(check[next[0]]) continue;
-            check[next[0]] = true;
-            temp = dfs(root, next[0], cur + next[1]);
-        }
-        return temp;
+        Solution sol = new Solution();
+        sol.solution();
     }
 }
+
+class Solution {
+
+    int N, R;
+    boolean[] v;
+    ArrayList<int[]>[] vertex;
+
+    public void solution() throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+
+        N = Integer.parseInt(st.nextToken());
+        R = Integer.parseInt(st.nextToken());
+
+        v = new boolean[N + 1];
+        vertex = new ArrayList[N + 1];
+        for(int i = 1; i <= N; i ++){
+            vertex[i] = new ArrayList<>();
+        }
+
+        for(int i = 0; i < N - 1; i ++){
+            st = new StringTokenizer(br.readLine(), " ");
+
+            int from = Integer.parseInt(st.nextToken());
+            int to = Integer.parseInt(st.nextToken());
+            int weight = Integer.parseInt(st.nextToken());
+
+            vertex[from].add(new int[] { to, weight });
+            vertex[to].add(new int[] { from, weight });
+        }
+
+        v[R] = true;
+        int[] giga = findGigaNode(R, 0);
+        int len = findMaxLen(giga[0], 0);
+
+        System.out.println(giga[1] + " " + len);
+    }
+
+    public int findMaxLen(int giga, int weight){
+        int len = weight;
+        for(int[] next : vertex[giga]){
+            if(v[next[0]]) continue;
+            v[next[0]] = true;
+            len = Math.max(len, findMaxLen(next[0], weight + next[1]));
+        }
+        return len;
+    }
+
+    public int[] findGigaNode(int root, int len){
+        int size = vertex[root].size();
+        if((root == R && size > 1) || (root != R && size > 2)){
+            return new int[] { root, len };
+        }
+        for(int[] next : vertex[root]){
+            if(v[next[0]]) continue;
+            v[next[0]] = true;
+            return findGigaNode(next[0], len + next[1]);
+        }
+        return new int[] { root, len };
+    }
+}
+
