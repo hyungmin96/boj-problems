@@ -1,60 +1,75 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
-public class Main {
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    int R, C;
+    char[][] map;
+    StringBuilder[] sb;
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
-        int count = 0, idx = 1;
-        int R = Integer.parseInt(st.nextToken());
-        int C = Integer.parseInt(st.nextToken());
-        ArrayList<String> list = new ArrayList<>();
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
+        sb = new StringBuilder[C];
 
-        for(int i = 0; i < R; i++)
-            list.add(br.readLine());
+        if(R == 2){
+            System.out.println(0);
+            return;
+        }
 
-        ArrayList<String> colStrings = makeCols(list, C);
-
-        while (true) {
-            if (isDup(colStrings, idx)) {
-                System.out.println(count);
-                break;
-            } else {
-                count++;
-                idx++;
+        for(int r = 0; r < R; r ++){
+            String str = br.readLine();
+            for(int c = 0; c < C; c ++){
+                if(sb[c] == null){
+                    sb[c] = new StringBuilder();
+                }
+                sb[c].append(str.charAt(c));
             }
         }
+
+        System.out.println(bs());
     }
 
-    private static ArrayList<String> makeCols(ArrayList<String> list, int C) {
-        ArrayList<String> temp = new ArrayList<>();
-
-        for (int i = 0; i < C; i++) {
-            StringBuilder builder = new StringBuilder();
-
-            for (String s : list)
-                builder.append(s.charAt(i));
-
-            temp.add(builder.toString());
+    public int bs(){
+        int l = 0, r = R;
+        int ret = 987654321;
+        while(l <= r){
+            int mid = (r + l) / 2;
+            if(!check(mid)){
+                ret = mid;
+                r = mid - 1;
+            }else{
+                l = mid + 1;
+            }
         }
-        return temp;
+
+        if(ret == 987654321)
+            return 0;
+
+        return ret - 1;
     }
-    private static boolean isDup(ArrayList<String> list, int idx) {
-        Map<String, Integer> map = new HashMap<>();
 
-        for (String col : list){
-            col = col.substring(idx);
-            map.put(col, map.getOrDefault(col, 0) + 1);
-
-            if (map.get(col) >= 2)
-                return true;
+    public boolean check(int mid){
+        HashSet<String> set = new HashSet<>();
+        for(int c = 0; c < C; c ++){
+            String str = sb[c].substring(mid);
+            if(!set.contains(str)){
+                set.add(str);
+            }else{
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 }
+
