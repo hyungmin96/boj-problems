@@ -1,147 +1,171 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
-public class Main {
-
-    static class Ball{
-        int idx, r, c, d;
-        boolean state;
-        public Ball(int idx, int r, int c, int d, boolean state){
-            this.idx = idx;
-            this.r = r;
-            this.c = c;
-            this.d = d;
-            this.state = state;
-        }
+class Main {
+    public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
     }
+}
 
-    static final int RED = 0;
-    static final int BLUE = 1;
+class Solution {
 
-    static int N, M, answer = 12;
-    static char[][] map;
-    static int[][] dirs = {{ -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 }};
-    static int[][] order = {{1,3},{0,2},{1,3},{0,2}};
+    int N, M;
+    char[][] map;
+    boolean[][][][] v;
+    int[] end = new int[2];
+    int[][] ball;
+    int[][] dirs = {{-1,0},{0,1},{1,0},{0,-1}};
 
-    public static void main(String[] args) throws IOException{
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         map = new char[N][M];
-        
-        Ball red = new Ball(0, 0, 0, 0, true), blue = new Ball(0, 0, 0, 0, true);
+        v = new boolean[N][M][N][M];
+        ball = new int[2][2];
+
         for(int i = 0; i < N; i ++){
             String str = br.readLine();
-            for(int j = 0; j < str.length(); j ++){
-                if(str.charAt(j) == 'R') {
-                    red = new Ball(RED, i, j, -1, true);
-                }else if(str.charAt(j) == 'B') {
-                    blue = new Ball(BLUE, i, j, -1, true);
+            for(int j = 0; j < M; j ++){
+                char c = str.charAt(j);
+                map[i][j] = c;
+                if(c == 'R'){
+                    ball[0] = new int[] { i, j };
+                }else if(c == 'B'){
+                    ball[1] = new int[] { i, j };
+                }else if(c == 'O'){
+                    end = new int[] { i, j };
                 }
-
-                map[i][j] = str.charAt(j);
             }
         }
-
-        dfs(0, -1, red, blue);
-        System.out.println(answer == 12 ? -1 : answer);
+        int answer = backtracking(0, new int[11], false, false);
+        System.out.println(answer == 987654321 ? -1 : answer);
     }
 
-    public static void dfs(int depth, int dir, Ball red, Ball blue){
-        
-        if(depth > 10 || !blue.state){
-            return;
+    public int backtracking(int depth, int[] arr, boolean red, boolean blue){
+        if(blue){
+            return 987654321;
+        }
+        if(depth == 11){
+            return 987654321;
         }
 
-        if(!red.state && blue.state){
-            answer = Math.min(answer, depth);
-            return;
+        if(map[ball[0][0]][ball[0][1]] == 'O' && map[ball[1][0]][ball[1][1]] != 'O'){
+            return depth;
         }
 
-        if(dir == -1){
-            for(int d = 0; d < 4; d ++){
-                Ball[] next = move(d, red, blue);
-                int idx = (next[0].idx == RED) ? 0 : 1;
-                int idx2 = (next[1].idx == BLUE) ? 1 : 0;
-                dfs(depth + 1, d, next[idx], next[idx2]);
-                for(int r = 0; r < N; r ++){
-                    for(int c = 0; c < M; c ++){
-                        if(map[r][c] == 'R' || map[r][c] == 'B'){
-                            map[r][c] = '.';
-                        }
-                    }
-                }
-            }
-        }else{
-            for(int d : order[dir]){
-                Ball[] next = move(d, red, blue);
-                int idx = (next[0].idx == RED) ? 0 : 1;
-                int idx2 = (next[1].idx == BLUE) ? 1 : 0;
-                dfs(depth + 1, d, next[idx], next[idx2]);
-                for(int r = 0; r < N; r ++){
-                    for(int c = 0; c < M; c ++){
-                        if(map[r][c] == 'R' || map[r][c] == 'B'){
-                            map[r][c] = '.';
-                        }
-                    }
-                }
-            }
+        if(v[ball[0][0]][ball[0][1]][ball[1][0]][ball[1][1]]){
+            return 987654321;
         }
-        
+
+        v[ball[0][0]][ball[0][1]][ball[1][0]][ball[1][1]] = true;
+        int ret = 987654321;
+        for(int d = 0; d < 4; d ++){
+            int idx = selectBall(d); // 0: 빨간색, 1: 파란색
+            
+            int[][] tmp = copyArr(ball);
+
+            map[ball[0][0]][ball[0][1]] = '.';
+            map[ball[1][0]][ball[1][1]] = '.';
+            move(d, idx, ball[idx]);
+            move(d, 1 - idx, ball[1 - idx]);
+            map[end[0]][end[1]] = 'O';
+            boolean red_state = map[ball[0][0]][ball[0][1]] == 'O' ? true : false;
+            boolean blue_state = map[ball[1][0]][ball[1][1]] == 'O' ? true : false;
+            arr[depth] = d;
+            ret = Math.min(ret, backtracking(depth + 1, arr, red_state, blue_state));
+            arr[depth] = -1;
+            map[ball[0][0]][ball[0][1]] = '.';
+            map[ball[1][0]][ball[1][1]] = '.';
+            ball = copyArr(tmp);
+            map[ball[0][0]][ball[0][1]] = 'R';
+            map[ball[1][0]][ball[1][1]] = 'B';
+            map[end[0]][end[1]] = 'O';
+        }
+        v[ball[0][0]][ball[0][1]][ball[1][0]][ball[1][1]] = false;
+        return ret;
     }
 
-    public static Ball[] move(int d, Ball red, Ball blue){
-        Ball[] temp = new Ball[2];
-        temp[0] = new Ball(red.idx, red.r, red.c, d, red.state);
-        temp[1] = new Ball(blue.idx, blue.r, blue.c, d, blue.state);
+    public void move(int d, int idx, int[] cur_ball){
+        int r = cur_ball[0];
+        int c = cur_ball[1];
+        if(r == end[0] && c == end[1]) return;
+        while(true){
+            int nr = r + dirs[d][0];
+            int nc = c + dirs[d][1];
+            if(nr < 0 || nc < 0 || nr >= N || nc >= M) break;
+            if(map[nr][nc] == 'R' || map[nr][nc] == 'B') break;
+            if(map[nr][nc] == 'O') {
+                ball[idx][0] = nr;
+                ball[idx][1] = nc;
+                return;
+            }else if(map[nr][nc] != '.') {
+                break;
+            }
+            r = nr;
+            c = nc;
+        }
+        
+        ball[idx][0] = r;
+        ball[idx][1] = c;
+        map[ball[idx][0]][ball[idx][1]] = idx == 0 ? 'R' : 'B';
+    }
 
-        Arrays.sort(temp, new Comparator<>(){
-            @Override
-            public int compare(Ball o1, Ball o2){
-                if(o1.d == 0){
-                    return o1.r - o2.r;
-                }else if(o1.d == 1){
-                    return o2.c - o1.c;
-                }else if(o1.d == 2){
-                    return o2.r - o1.r;
+    public int selectBall(int d){
+        int[] red_ball = ball[0];
+        int[] blue_ball = ball[1];
+        switch(d){
+            case 0:
+            if(red_ball[1] == blue_ball[1]){
+                if(red_ball[0] > blue_ball[0]){
+                    return 1;
                 }else{
-                    return o1.c - o2.c;
+                    return 0;
                 }
             }
-        });
-            
-        for(int i = 0; i < temp.length; i ++){
-            int idx = temp[i].idx;
-            int nr = temp[i].r;
-            int nc = temp[i].c;
-            while(true){
-                nr += dirs[d][0];
-                nc += dirs[d][1];
-                if(!oob(nr, nc) || (map[nr][nc] != '.' && map[nr][nc] != 'O')){
-                    nr += dirs[d][0] * -1;
-                    nc += dirs[d][1] * -1;
-                    break;
+            break;
+            case 1:
+            if(red_ball[0] == blue_ball[0]){
+                if(red_ball[1] > blue_ball[1]){
+                    return 0;
+                }else{
+                    return 1;
                 }
-                if(map[nr][nc] == 'O'){
-                    map[temp[i].r][temp[i].c] = '.';
-                    temp[i].state = false;
-                    break;
-                }   
             }
-            
-            if(map[temp[i].r][temp[i].c] != 'O')
-                map[temp[i].r][temp[i].c] = '.';
-            temp[i] = new Ball(idx, nr, nc, d, temp[i].state);
-            if(temp[i].state && map[temp[i].r][temp[i].c] != 'O')
-                map[temp[i].r][temp[i].c] = (temp[i].state && idx == RED) ? 'R' : 'B';
+            break;
+            case 2:
+            if(red_ball[1] == blue_ball[1]){
+                if(red_ball[0] > blue_ball[0]){
+                    return 0;
+                }else{
+                    return 1;
+                }
+            }
+            break;
+            case 3:
+            if(red_ball[0] == blue_ball[0]){
+                if(red_ball[1] > blue_ball[1]){
+                    return 1;
+                }else{
+                    return 0;
+                }
+            }
+            break;
         }
-
-        return temp;
+        return 0;
     }
 
-    public static boolean oob(int nr, int nc){
-        if(nr < 0 || nc < 0 || nr >= N || nc >= M) return false;
-        return true;
+    public int[][] copyArr(int[][] ball){
+        int[][] tmp = new int[2][2];
+        for(int i = 0; i < 2; i ++){
+            for(int j = 0; j < 2; j ++){
+                tmp[i][j] = ball[i][j];
+            }
+        }
+
+        return tmp;
     }
 }
