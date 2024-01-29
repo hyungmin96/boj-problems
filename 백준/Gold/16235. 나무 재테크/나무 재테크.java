@@ -1,98 +1,129 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
-    static int N, M, K;
-    static int[][] dirs = {{ -1, 0 }, { -1, 1 }, { 0, 1 }, { 1, 1 }, { 1, 0 }, { 1, -1 }, { 0, -1 }, { -1, -1 }};
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    int N, M, K;
+    int[][] robot, condition;
+    ArrayList<Integer>[][] trees, dead;
+
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         K = Integer.parseInt(st.nextToken());
 
-        int[][] map = new int[N][N];
-        int[][] add = new int[N][N];
-        ArrayList<Integer>[][] trees = new ArrayList[N][N];
+        robot = new int[N][N];
+        condition = new int[N][N];
+        trees = new ArrayList[N][N];
+        dead = new ArrayList[N][N];
+
+        for(int i = 0; i < N; i ++){
+            for(int j = 0; j < N; j ++){
+                trees[i][j] = new ArrayList<>();
+                dead[i][j] = new ArrayList<>();
+                condition[i][j] = 5;
+            }
+        }
         for(int i = 0; i < N; i ++){
             st = new StringTokenizer(br.readLine(), " ");
             for(int j = 0; j < N; j ++){
-                trees[i][j] = new ArrayList<>();
-                map[i][j] = 5;
-                add[i][j] = Integer.parseInt(st.nextToken());
+                robot[i][j] = Integer.parseInt(st.nextToken());
             }
         }
 
-        int cnt = M;
         for(int i = 0; i < M; i ++){
-            st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken()) - 1;
-            int y = Integer.parseInt(st.nextToken()) - 1;
-            int z = Integer.parseInt(st.nextToken());
+            st = new StringTokenizer(br.readLine(), " ");
+            int r = Integer.parseInt(st.nextToken()) - 1;
+            int c = Integer.parseInt(st.nextToken()) - 1;
+            int age = Integer.parseInt(st.nextToken());
 
-            trees[x][y].add(z);
+            trees[r][c].add(age);
         }
 
-        System.out.println(solution(cnt, map, add, trees));
+        System.out.println(solve());
     }
 
-    public static int solution(int cnt, int[][] map, int[][] add, ArrayList<Integer>[][] trees){
-        for(int i = 1; i <= K; i ++){
-            ArrayList<int[]> dead = new ArrayList<>();
-            for(int r = 0; r < N; r ++){
-                for(int c = 0; c < N; c ++){
-                    if(trees[r][c].size() > 0){
-                        ArrayList<Integer> temp = new ArrayList<>();
-                        Collections.sort(trees[r][c]);
-                        for(int age : trees[r][c]){
-                            if(map[r][c] >= age){
-                                temp.add(age + 1);
-                                map[r][c] -= age;
-                            }else{
-                                cnt --;
-                                dead.add(new int[] { r, c, age });
-                            }
-                        }
-                        trees[r][c] = temp;
-                    }
-                }
-            }
+    public int solve(){
+        for(int i = 0; i < K; i ++){
+            spring();
+            summer();
+            fall();
+            winter();
+        }
+        return M;
+    }
 
-            for(int[] d : dead){
-                int r = d[0];
-                int c = d[1];
-                map[r][c] += d[2] / 2;
+    public void winter(){
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < N; c ++){
+                condition[r][c] += robot[r][c];
             }
-            dead.clear();
+        }
+    }
 
-            for(int r = 0; r < N; r ++){
-                for(int c = 0; c < N; c ++){
-                    if(trees[r][c].size() > 0){
-                        for(int k = 0; k < trees[r][c].size(); k ++){
-                            if(trees[r][c].get(k) % 5 == 0){
-                                for(int d = 0; d < dirs.length; d ++){
-                                    int nr = r + dirs[d][0];
-                                    int nc = c + dirs[d][1];
-                                    if(nr < 0 || nc < 0 || nr >= N || nc >= N) continue;
-                                    trees[nr][nc].add(1);
-                                    cnt ++;
-                                }
-                            }
+    public void fall(){
+        int[][] dirs = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < N; c ++){
+                for(int i = 0; i < trees[r][c].size(); i ++){
+                    if(trees[r][c].get(i) % 5 == 0){
+                        for(int d = 0; d < dirs.length; d ++){
+                            int nr = r + dirs[d][0];
+                            int nc = c + dirs[d][1];
+                            if(nr < 0 || nc < 0 || nr >= N || nc >= N) continue;
+                            M ++;
+                            trees[nr][nc].add(1);
                         }
                     }
-                }
-            }
-
-            for(int r = 0; r < N; r ++){
-                for(int c = 0; c < N; c ++){
-                    map[r][c] += add[r][c];
                 }
             }
         }
+    }
 
-        return cnt;
+    public void summer(){
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < N; c ++){
+                if(dead[r][c].size() > 0){
+                    int total = 0;
+                    for(int i = 0; i < dead[r][c].size(); i ++){
+                        total += dead[r][c].get(i) / 2;
+                    }
+                    condition[r][c] += total;
+                    dead[r][c].clear();
+                }
+            }
+        }
+    }
+
+    public void spring(){
+        for(int r = 0; r < N; r ++){
+            for(int c = 0; c < N; c ++){
+                if(trees[r][c].size() > 0){
+                    ArrayList<Integer> tmp = new ArrayList<>();
+                    Collections.sort(trees[r][c]);
+
+                    for(int i = 0; i < trees[r][c].size(); i ++){
+                        if(condition[r][c] >= trees[r][c].get(i)){
+                            condition[r][c] -= trees[r][c].get(i);
+                            tmp.add(trees[r][c].get(i) + 1);
+                        }else{
+                            M --;
+                            dead[r][c].add(trees[r][c].get(i));
+                        }
+                    }
+                    trees[r][c] = new ArrayList<>(tmp);
+                }
+            }
+        }
     }
 }
