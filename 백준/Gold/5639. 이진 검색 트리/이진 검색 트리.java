@@ -1,42 +1,49 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
-    public static class Node{
-        int val;
-        Node left = null, right = null;
-        public Node(int val) { this.val = val; }
-    }
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        // sol.solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    int N;
+    int depth = 1;
+    public void solution() throws IOException {
+        String s = "";
+        ArrayList<Integer> nodes = new ArrayList<>();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        String str = null;
-        Node root = new Node(Integer.parseInt(br.readLine()));
-        while((str = br.readLine()) != null && !str.equals("")){
-            int num = Integer.parseInt(str);
-            create(root, num);
+        while((s = br.readLine()) != null && !s.isEmpty()){
+            int key = Integer.parseInt(s);
+            nodes.add(key);
         }
 
-        dfs(root);
+        dfs(Integer.MAX_VALUE, nodes.get(0), nodes);
     }
 
-    public static void dfs(Node root){
-        if(root.left != null) dfs(root.left);
-        if(root.right != null) dfs(root.right);
-        System.out.println(root.val);
-    }
-
-    public static void create(Node parent, int val){
-        if(parent.val > val){
-            if(parent.left == null)
-                parent.left = new Node(val);
-            else create(parent.left, val);
-        }else{
-            if(parent.right == null)
-                parent.right = new Node(val);
-            else create(parent.right, val);
+    public void dfs(int p, int start, ArrayList<Integer> nodes){
+        if(depth < nodes.size()){
+            // 왼쪽 서브트리 구성
+            int next = nodes.get(depth);
+            if(start > next){
+                depth ++;
+                dfs(start, next, nodes);
+            }
         }
+
+        if(depth < nodes.size()){
+            // 오른쪽 서브트리 구성
+            int next = nodes.get(depth);
+            if(p > next && start < next){
+                depth ++;
+                dfs(p, next, nodes);
+            }
+        }
+
+        System.out.println(start);
     }
 }
