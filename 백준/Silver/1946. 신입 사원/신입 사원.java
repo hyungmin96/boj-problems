@@ -1,29 +1,38 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
+class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
-        int tc = Integer.parseInt(br.readLine());
-        for(int i = 0; i < tc; i ++){
-            int n = Integer.parseInt(br.readLine());
-            int[] scores = new int[n + 1];
-            for(int j = 0; j < n; j ++){
-                StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-                int s1 = Integer.parseInt(st.nextToken());
-                int s2 = Integer.parseInt(st.nextToken());
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
 
-                scores[s1] = s2;
+class Solution {
+    
+    StringBuilder sb = new StringBuilder();
+
+    public void solution() throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int testcase = Integer.parseInt(br.readLine());
+        
+        for(int i = 0; i < testcase; i ++){
+            int N = Integer.parseInt(br.readLine());
+            int[] arr = new int[N + 1];
+            for(int j = 0; j < N; j ++){
+                StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+                int interview = Integer.parseInt(st.nextToken());
+                int paper = Integer.parseInt(st.nextToken());
+
+                arr[interview] = paper;
             }
 
-            int answer = 1;
-            int max_score = scores[1];
-            for (int idx1 = 2; idx1 <= n; idx1 ++){
-                if(max_score > scores[idx1]){
+            int answer = 0;
+            int max = 987654321;
+            for(int j = 1; j <= N; j ++){
+                if(max > arr[j]){
+                    max = arr[j];
                     answer ++;
-                    max_score = scores[idx1];
                 }
             }
 
