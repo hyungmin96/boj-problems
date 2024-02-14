@@ -1,7 +1,8 @@
 import java.io.*;
 import java.util.*;
-public class Main{
-    public static void main(String[] args) throws IOException{
+
+class Main {
+    public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
     }
@@ -9,131 +10,195 @@ public class Main{
 
 class Solution {
 
-    int N, M, K;
-    int[] taxi_pos = new int[2];
-    int[][] map, peoples;
-    int[][] dirs = {{ -1, 0 },{ 0, -1 },{ 0, 1 },{ 1, 0 }};
+    static final int INF = 987654321;
 
-    public void solution() throws IOException{
+    int N, M, K;
+
+    int[] taxi = new int[2];
+
+    int[][] destination;
+
+    int[][] map;
+
+    int[][] dirs = { { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         K = Integer.parseInt(st.nextToken());
-
         map = new int[N][N];
-        peoples = new int[M][2];
+        destination = new int[M + 1][2];
 
-        for(int i = 0; i < N; i ++){
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j < N; j ++){
+            for (int j = 0; j < N; j++) {
                 map[i][j] = Integer.parseInt(st.nextToken());
+                if (map[i][j] == 1) {
+                    map[i][j] = -1;
+                }
             }
         }
 
         st = new StringTokenizer(br.readLine(), " ");
+
         int r = Integer.parseInt(st.nextToken()) - 1;
         int c = Integer.parseInt(st.nextToken()) - 1;
-        taxi_pos = new int[] { r, c };
 
-        for(int i = 0; i < M; i ++){
+        taxi = new int[] { r, c };
+
+        for (int idx = 0; idx < M; idx++) {
             st = new StringTokenizer(br.readLine(), " ");
+
             int sr = Integer.parseInt(st.nextToken()) - 1;
             int sc = Integer.parseInt(st.nextToken()) - 1;
-
-            map[sr][sc] = i + 2;
             int dr = Integer.parseInt(st.nextToken()) - 1;
             int dc = Integer.parseInt(st.nextToken()) - 1;
-            peoples[i] = new int[] { dr, dc };
+
+            map[sr][sc] = (idx + 1);
+            destination[idx + 1] = new int[] { dr, dc };
         }
 
-        for(int i = 0; i < M; i ++){
-            if(!find()){
+        solve();
+    }
+
+    public void solve() {
+        for(int i = 0; i < M && K > 0; i ++) {
+            int idx = findPerson();
+            if(K < 0 || idx == -1){
                 K = -1;
                 break;
             }
-        }
 
+            int[] dest = destination[idx];
+            moveDestination(dest);
+        }
         System.out.println(K);
     }
 
-    public boolean find(){
+    public void moveDestination(int[] dest){
         boolean[][] v = new boolean[N][N];
+        // [r, c, 소비한 연료]
         Queue<int[]> q = new LinkedList<>();
-        PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>(){
-            @Override
-            public int compare(int[] o1, int[] o2){
-                if(o1[2] != o2[2]) return o1[2] - o2[2];
-                else if(o1[0] != o2[0]) return o1[0] - o2[0];
-                return o1[1] - o2[1];
-            }
-        });
-
-        q.offer(new int[] { taxi_pos[0], taxi_pos[1], 0 });
-        v[taxi_pos[0]][taxi_pos[1]] = true;
+        q.offer(new int[] { taxi[0], taxi[1], 0 });
+        v[taxi[0]][taxi[1]] = true;
 
         while(!q.isEmpty()){
             int[] cur = q.poll();
-            if(map[cur[0]][cur[1]] > 1){
-                pq.offer(new int[] { cur[0], cur[1], cur[2] });
+            if(cur[0] == dest[0] && cur[1] == dest[1]){
+                taxi = cur;
+                K -= cur[2];
+                if(K < 0){
+                    K = -1;
+                }else{
+                    K += (cur[2] * 2);
+                }
+                return;
+            }
+            
+            for (int d = 0; d < 4; d++) {
+                int nr = cur[0] + dirs[d][0];
+                int nc = cur[1] + dirs[d][1];
+                if (nr < 0 || nc < 0 || nr >= N || nc >= N) {
+                    continue;
+                }
+
+                if (v[nr][nc]) {
+                    continue;
+                }
+
+                if(cur[2] + 1 > K){
+                    continue;
+                }
+
+                if (map[nr][nc] == -1) {
+                    continue;
+                }
+
+                v[nr][nc] = true;
+                q.offer(new int[] { nr, nc, cur[2] + 1 });
+            }
+        }
+        K = -1;
+    }
+
+    public int findPerson() {
+        boolean[][] v = new boolean[N][N];
+        // [r, c, 소비한 연료]
+        Queue<int[]> q = new LinkedList<>();
+        q.offer(new int[] { taxi[0], taxi[1], 0 });
+        v[taxi[0]][taxi[1]] = true;
+        int idx = -1, fuel = 0;
+        int dist = INF, row = INF, col = INF;
+        boolean flag = false;
+        while (!q.isEmpty()) {
+            int[] cur = q.poll();
+
+            if (map[cur[0]][cur[1]] > 0) {
+                // 사람 발견
+                flag = true;
+                if (dist >= cur[2]) {
+                    if (dist > cur[2]) {
+                        row = cur[0];
+                        col = cur[1];
+                    } else {
+                        if (row > cur[0]) {
+                            row = cur[0];
+                            col = cur[1];
+                        } else if (row == cur[0]) {
+                            col = Math.min(col, cur[1]);
+                        }
+                    }
+                    dist = cur[2];
+                    fuel = dist;
+                    idx = map[row][col];
+                }
                 continue;
             }
 
-            if(cur[2] == K) continue;
-            for(int d = 0; d < 4; d ++){
+            if (K <= cur[2]) {
+                return -1;
+            }
+
+            for (int d = 0; d < 4; d++) {
                 int nr = cur[0] + dirs[d][0];
                 int nc = cur[1] + dirs[d][1];
-                if(isOutRange(nr, nc) || v[nr][nc] || map[nr][nc] == 1) continue;
+                if (nr < 0 || nc < 0 || nr >= N || nc >= N) {
+                    continue;
+                }
+
+                if (v[nr][nc]) {
+                    continue;
+                }
+
+                if (map[nr][nc] == -1) {
+                    continue;
+                }
+
+                if(dist <= cur[2]){
+                    continue;
+                }
+
                 v[nr][nc] = true;
                 q.offer(new int[] { nr, nc, cur[2] + 1 });
             }
         }
 
-        if(pq.size() == 0) return false;
-        int pr = pq.peek()[0];
-        int pc = pq.peek()[1];
-        K -= pq.peek()[2];
-
-        taxi_pos = new int[] { pr, pc };
-        if(move(map[pr][pc], pr, pc)){
-            map[pr][pc] = 0;
-            return true;
+        if(K <= fuel){
+            return -1;
         }
 
-        return false;
-    }
+        if(flag){
 
-    public boolean move(int idx, int r, int c){
-        boolean[][] v = new boolean[N][N];
-        Queue<int[]> q = new LinkedList<>();
-
-        q.offer(new int[] { r, c, 0, 0 });
-        v[taxi_pos[0]][taxi_pos[1]] = true;
-
-        while(!q.isEmpty()){
-            int[] cur = q.poll();
-            if(cur[0] == peoples[idx - 2][0] && cur[1] == peoples[idx - 2][1]){
-                K -= cur[2];
-                K += (cur[2] * 2);
-                taxi_pos = new int[] { cur[0], cur[1] };
-                return true;
-            }
-            if(cur[2] == K) continue;
-            for(int d = 0; d < 4; d ++){
-                int nr = cur[0] + dirs[d][0];
-                int nc = cur[1] + dirs[d][1];
-                if(isOutRange(nr, nc) || v[nr][nc] || map[nr][nc] == 1) continue;
-                v[nr][nc] = true;
-                q.offer(new int[] { nr, nc, cur[2] + 1 });
-            }
+            taxi[0] = row;
+            taxi[1] = col;
+            
+            K -= fuel;
+            map[row][col] = 0;
+        }else{
+            K = -1;
         }
-
-        return false;
-    }
-
-    public boolean isOutRange(int r, int c){
-        return r < 0 || c < 0 || r >= N || c >= N;
+        return idx;
     }
 }
-
