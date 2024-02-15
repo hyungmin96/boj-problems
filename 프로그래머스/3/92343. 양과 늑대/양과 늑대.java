@@ -26,6 +26,7 @@ class Solution {
         answer = Math.max(answer, s);
         for(int next : nodes[node]){
             if(w >= s) continue;
+            if(v[next][w][s]) continue;
             int tmp = info[next];
             info[next] = -1;
             if(tmp == 0){
@@ -33,17 +34,15 @@ class Solution {
             }else if(tmp == 1){
                 w ++;
             }
-            if(v[next][w][s]) continue;
             v[next][w][s] = true;
             dfs(next, w, s, info);
             v[next][w][s] = false;
-            
-            info[next] = tmp;
             if(tmp == 0){
                 s --;
             }else if(tmp == 1){
                 w --;
             }
+            info[next] = tmp;
         }
     }
 }
