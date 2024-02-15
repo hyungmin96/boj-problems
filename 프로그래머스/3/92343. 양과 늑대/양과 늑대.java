@@ -1,44 +1,49 @@
 import java.util.*;
 class Solution {
     int answer = 0;
-    ArrayList<Integer>[] vertex;
-    boolean[][][] v;
-    
+    boolean[][][] v = new boolean[17][17][17];
+    ArrayList<Integer>[] nodes = new ArrayList[17];
     public int solution(int[] info, int[][] edges) {
-        vertex = new ArrayList[info.length + 1];
-        for(int i = 0; i <= info.length; i ++)
-            vertex[i] = new ArrayList<>();
-        
-        for(int i = 0; i < edges.length; i ++){
-            int s = edges[i][0];
-            int e = edges[i][1];
-            
-            vertex[s].add(e);
-            vertex[e].add(s);
+        for(int i = 0; i < 17; i ++){
+            nodes[i] = new ArrayList<>();
         }
         
-        v = new boolean[info.length + 1][18][18];
-        dfs(info, 0, 0, 0);
+        for(int[] e : edges){
+            int from = e[0];
+            int to = e[1];
+            nodes[to].add(from);
+            nodes[from].add(to);
+        }
+        
+        info[0] = -1;
+        v[0][0][1] = true;
+        dfs(0, 0, 1, info);
         
         return answer;
     }
     
-    public void dfs(int[] info, int node, int s, int w){
+    public void dfs(int node, int w, int s, int[] info){
         answer = Math.max(answer, s);
-        int tmp = info[node];
-        if(tmp == 0) s ++; else if(tmp == 1) w ++;
-        if(s <= w) return;
-        
-        if(v[node][s][w]) return;
-        v[node][s][w] = true;
-        info[node] = -1;
-        
-        for(int next : vertex[node]){
-            dfs(info, next, s, w);
+        for(int next : nodes[node]){
+            if(w >= s) continue;
+            int tmp = info[next];
+            info[next] = -1;
+            if(tmp == 0){
+                s ++;
+            }else if(tmp == 1){
+                w ++;
+            }
+            if(v[next][w][s]) continue;
+            v[next][w][s] = true;
+            dfs(next, w, s, info);
+            v[next][w][s] = false;
+            
+            info[next] = tmp;
+            if(tmp == 0){
+                s --;
+            }else if(tmp == 1){
+                w --;
+            }
         }
-        
-        v[node][s][w] = false;
-        info[node] = tmp;
-        if(tmp == 0) s --; else if(tmp == 1) w --;
     }
 }
