@@ -1,57 +1,60 @@
+import java.util.*;
 class Solution {
     public int[] solution(long[] numbers) {
         int[] answer = new int[numbers.length];
-        
         for(int i = 0; i < numbers.length; i ++){
-            String s = getBinary(numbers[i]);
-            if(dfs(s)){
+            long n = numbers[i];
+            String s = getBinaryCode(n);
+            
+            if(dfs(0, 0, s.length(), s)){
                 answer[i] = 1;
+            }else{
+                answer[i] = 0;
             }
+            System.out.println();
         }
         return answer;
     }
     
-    public boolean dfs(String s){
-        int root = s.length() / 2;
-        if(s.length() == 1) return true;
-        
-        // 부모가 0일 경우 자식노드가 존재하는지 확인
-        if(s.charAt(root) == '0'){
-            if(s.contains("1")) return false;
+    public boolean dfs(int depth, int l, int r, String s){
+        if(l == r){
+            return true;
         }
+        int mid = (r + l) / 2;
         
-        if(s.charAt(root) == '0'){
-            if(!s.contains("1")) return true;
+        int nl = s.charAt((mid + l) / 2) - '0';
+        int nr = s.charAt((r + mid) / 2) - '0';
+        
+        if(s.charAt(mid) - '0' == 0){
+            if(nl== 1 || nr == 1){
+                return false;
+            }
         }
-
-        String left = s.substring(0, root);
-        String right = s.substring(root + 1, s.length());
-        // 왼쪽 서브트리 만들기
-        if(!dfs(left)) return false;
-        // 오른쪽 서브트리 만들기
-        if(!dfs(right)) return false;
-        
-        return true;
+        return dfs(depth + 1, l, mid, s) && dfs(depth + 1, mid + 1, r, s);
     }
     
-    public String getBinary(long num){
+    public String getBinaryCode(long n){
+        int cnt = 0;
         StringBuilder sb = new StringBuilder();
-        while(num > 0){
-            sb.append(num % 2 == 0 ? 0 : 1);
-            num /= 2;
+        while(n > 0){
+            if(n % 2 == 0){
+                sb.append("0");
+            }else{
+                sb.append("1");
+            }
+            n /= 2;
+            cnt ++;
         }
         
-        int cnt = 0;
-        long total = 0;
-        while(total < sb.toString().length()){
-            total += (int)Math.pow(2, cnt ++);
+        int total = 1, mul = 0;
+        while(total < cnt){
+            total = (int)Math.pow(2, mul++) - 1;
         }
-
-        int k = sb.toString().length();
-        for(int j = 0; j < total - k; j ++){
+        
+        int len = sb.toString().length();
+        for(int i = 0; i < total - len; i ++){
             sb.append("0");
         }
-
         
         return sb.reverse().toString();
     }
