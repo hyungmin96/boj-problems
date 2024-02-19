@@ -1,8 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
+class Main {
     public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
@@ -11,140 +10,132 @@ public class Main {
 
 class Solution {
 
-    int R, C;
-    char[][] map;
-    int[][] dirs = {
-        { -1, 0 },
-        { 0, 1 },
-        { 1, 0 },
-        { 0, -1 },
-    };
+	int R, C;
+	char[][] map;
+	boolean flag = false;
+	boolean[][] v;
+	int[][] dirs = {{1,0},{-1,0},{0,1},{0,-1}};
 
-    public void solution() throws IOException{
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		R = Integer.parseInt(st.nextToken());
+		C = Integer.parseInt(st.nextToken());
+		map = new char[R][C];
+		for(int i = 0; i < R; i ++){
+			String s = br.readLine();
+			for(int j = 0; j < C; j ++){
+				map[i][j] = s.charAt(j);
+			}
+		}
 
-        R = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
-        map = new char[R][C];
+		int nums = Integer.parseInt(br.readLine());
+		st = new StringTokenizer(br.readLine());
+		
+		solve(nums, st);
+	}
 
-        for(int i = 0; i < R; i ++){
-            String str = br.readLine();
-            for(int j = 0; j < C; j ++){
-                char ch = str.charAt(j);
-                map[i][j] = ch;
-            }
-        }
+	public void solve(int nums, StringTokenizer st){
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < nums; i ++){
+			int height = Integer.parseInt(st.nextToken());
 
-        int n = Integer.parseInt(br.readLine());
-        st = new StringTokenizer(br.readLine(), " ");
-        for(int i = 1; i <= n; i ++){
-            char[][] tmp_map = new char[R][C];
-            int height = R - Integer.parseInt(st.nextToken());
-            throwsSpear(i, height);   
-            clustering(tmp_map);
+			int[] pos = throwsSpear(height, i);
+			if(pos[0] == -1){
+				continue;
+			}
+			for(int d = 0; d < 4; d ++){
+				v = new boolean[R][C];
+				int nr = pos[0] + dirs[d][0];
+				int nc = pos[1] + dirs[d][1];
+				if(isOutRange(nr, nc)){
+					continue;
+				}
+				if(!v[nr][nc] && map[nr][nc] == 'x'){
+					flag = true;
+					ArrayList<int[]> nodes = new ArrayList<>();
+					dfs(new int[] { nr, nc }, nodes);
+					if(flag){
+						dropCluster(nodes);
+						break;
+					}
+				}
+			}
+		}
+		
+		for(int r = 0; r < R; r ++){
+			for(int c = 0; c < C; c ++){
+				sb.append(map[r][c]);
+			}
+			sb.append("\n");
+		}
+		System.out.println(sb.toString());
+	}
 
-            for(int r = 0; r < R; r ++){
-                for(int c = 0; c < C; c ++){
-                    if(tmp_map[r][c] != 'x')
-                        map[r][c] = '.';
-                    else
-                        map[r][c] = tmp_map[r][c];
-                }
-            }
-        }
+	public void dropCluster(ArrayList<int[]> nodes){
+		int len = 987654321;
+		Collections.sort(nodes, new Comparator<int[]>(){
+			@Override
+			public int compare(int[] o1, int[] o2){
+				return o2[0] - o1[0];
+			}
+		});
 
-        StringBuilder sb = new StringBuilder();
-        for(int r = 0; r < R; r ++){
-            for(int c = 0; c < C; c ++){
-                sb.append(map[r][c]);
-            }
-            sb.append("\n");
-        }
+		for(int[] p : nodes){
+			int nr = p[0];
+			while(nr + 1 < R && (v[nr + 1][p[1]] || map[nr + 1][p[1]] == '.')){
+				nr ++;
+			}
+			len = Math.min(len, nr - p[0]);
+		}
 
-        System.out.println(sb.toString());
-    }
+		for(int[] p : nodes){
+			map[p[0]][p[1]] = '.';
+			map[p[0] + len][p[1]] = 'x';
+		}
+	}
 
-    public void clustering(char[][] tmp_map){
-        for(int r = R - 1; r >= 0; r --){
-            for(int c = 0; c < C; c ++){
-                if(map[r][c] == 'x'){
-                    // 해당 열의 열 번호가 가장 큰 정보를 저장
-                    ArrayList<int[]> tmp = new ArrayList<>();
-                    HashMap<Integer, Integer> cols_min_row = new HashMap<>();
-                    bfs(r, c, tmp, cols_min_row);
-                    moveCluster(tmp_map, tmp, cols_min_row);
-                }
-            }
-        }
-    }
+	public void dfs(int[] pos, ArrayList<int[]> nodes){
+		if(v[pos[0]][pos[1]]) return;
+		v[pos[0]][pos[1]] = true;
+		nodes.add(new int[] { pos[0], pos[1] });
+		if(pos[0] == R - 1){
+			flag = false;
+		}
+		for(int d = 0; d < 4; d ++){
+			int nr = pos[0] + dirs[d][0];
+			int nc = pos[1] + dirs[d][1];
+			if(isOutRange(nr, nc)){
+				continue;
+			}
+			if(map[nr][nc] == '.'){
+				continue;
+			}
+			dfs(new int[] { nr, nc }, nodes);
+		}
+	}
 
-    public void moveCluster(char[][] tmp_map, ArrayList<int[]> tmp, HashMap<Integer, Integer> cols_min_row){
-        int result_move = 987654321;
-        for(int col : cols_min_row.keySet()){
-            int cnt = 0;
-            int s = cols_min_row.get(col);
-            for(int r = s + 1; r < R; r ++){
-                if(r >= R || tmp_map[r][col] == 'x'){
-                    break;
-                }
-                cnt ++;
-            }
-            result_move = Math.min(cnt, result_move);
-        }
+	public boolean isOutRange(int r, int c){
+		return r < 0 || c < 0 || r >= R || c >= C;
+	}
 
-        for(int[] p : tmp){
-            tmp_map[p[0] + result_move][p[1]] = 'x';
-        }
-    }
-
-    public void bfs(int r, int c, ArrayList<int[]> tmp, HashMap<Integer, Integer> cols_min_row) {
-        boolean[][] chk = new boolean[R][C];
-        Queue<int[]> q = new LinkedList<>();
-        q.offer(new int[] { r, c });
-        chk[r][c] = true;
-
-        while (!q.isEmpty()) {
-            int[] cur = q.poll();
-            map[cur[0]][cur[1]] = '.';
-            tmp.add(new int[] { cur[0], cur[1] });
-            if (cols_min_row.containsKey(cur[1])) {
-                if (cols_min_row.get(cur[1]) < cur[0]) {
-                    cols_min_row.put(cur[1], cur[0]);
-                }
-            } else {
-                cols_min_row.put(cur[1], cur[0]);
-            }
-
-            for (int d = 0; d < 4; d++) {
-                int nr = cur[0] + dirs[d][0];
-                int nc = cur[1] + dirs[d][1];
-                if (nr < 0 || nc < 0 || nr >= R || nc >= C || chk[nr][nc] || map[nr][nc] == '.')
-                    continue;
-                chk[nr][nc] = true;
-                q.offer(new int[] { nr, nc });
-            }
-        }
-    }
-
-    public void throwsSpear(int order, int height) {
-        if (order % 2 != 0) {
-            // 왼쪽에서 던지기
-            for (int c = 0; c < C; c++) {
-                if (map[height][c] != '.') {
-                    map[height][c] = '.';
-                    break;
-                }
-            }
-        } else {
-            // 오른쪽에서 던지기
-            for (int c = C - 1; c >= 0; c--) {
-                if (map[height][c] != '.') {
-                    map[height][c] = '.';
-                    break;
-                }
-            }
-        }
-    }
+	public int[] throwsSpear(int height, int round){
+		height = R - height;
+		if(round % 2 == 0){
+			for(int i = 0; i < C; i ++){
+				if(map[height][i] == 'x'){
+					map[height][i] = '.';
+					return new int[] { height, i };
+				}
+			}
+		}else{
+			for(int i = C - 1; i >= 0; i --){
+				if(map[height][i] == 'x'){
+					map[height][i] = '.';
+					return new int[] { height, i };
+				}
+			}
+		}
+		return new int[] { -1 };
+	}
 }
-
