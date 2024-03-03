@@ -1,66 +1,104 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
-public class Main {
-
-    static int N;
-    static int[] price;
-    static String[] dp = new String[51];
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    public class Price{
+        int n, p;
+        public Price(int n, int p){
+            this.n = n;
+            this.p = p;
+        }
+    }
+
+    int N;
+    int[] map;
+    Price[] p;
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-        price = new int[N];
-        
+        p = new Price[N];
+        map = new int[N];
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
         for(int i = 0; i < N; i ++){
-            price[i] = Integer.parseInt(st.nextToken());
+            int price = Integer.parseInt(st.nextToken());
+            p[i] = new Price(i, price);
+            map[i] = price;
         }
+
         int asset = Integer.parseInt(br.readLine());
-        solution(asset);
+        solve(asset);
     }
 
-    public static void solution(int a){
-        Arrays.fill(dp, "");
-        for(int i = 1; i <= a; i ++){
-            for(int j = 0; j < N; j ++){
-                if(i - price[j] < 0) continue;
-                dp[i] = j + "";
+    public void solve(int asset){
+        // 가격이 가장 싸면서 큰 숫자순으로 정렬
+        Arrays.sort(p, new Comparator<Price>(){
+            @Override
+            public int compare(Price p1, Price p2){
+                if(p1.p != p2.p){
+                    return p1.p - p2.p;
+                }
+                return p2.n - p1.n;
             }
-        }
-
-        for(int i = 1; i <= a; i ++){
-            for(int j = N - 1; j >= 0; j --){
-                int p = price[j];
-                if(i - p < 0) continue;
-
-                String s1 = dp[i - p] + dp[p];
-                String s2 = dp[p] + dp[i - p];
-
-                dp[i] = compareStr(dp[i], compareStr(s1, s2));
-            }
-        }
+        });
         
-        System.out.println(dp[a]);
-    }
-
-    public static String compareStr(String s1, String s2){
-        while(s1.length() > 1 && s1.charAt(0) == '0')
-            s1 = s1.substring(1);
-
-        while(s2.length() > 1 && s2.charAt(0) == '0')
-            s2 = s2.substring(1);
-
-        if(s1.length() > s2.length()){
-            return s1;
-        }else if(s2.length() > s1.length()){
-            return s2;
-        }else{
-            if(s1.compareTo(s2) <= 0){
-                return s2;
+        // 가장 저렴한 가격의 숫자로 최대 자리 수 채우기
+        ArrayList<Integer> list = new ArrayList<>();
+        while(asset >= p[0].p){
+            if(list.size() == 0 && p[0].n == 0){
+                if(1 < N && p[1].p <= asset){
+                    list.add(p[1].n);
+                    asset -= p[1].p;
+                }else{
+                    asset = 0;
+                    break;
+                }
             }else{
-                return s1;
+                list.add(p[0].n);
+                asset -= p[0].p;
             }
         }
+
+        int[] nums = new int[list.size()];
+        for(int i = 0; i < list.size(); i ++){
+            nums[i] = list.get(i);
+        }
+
+        int rest = asset;
+        for(int idx = 0; idx < nums.length && rest > 0; idx ++){
+            // 현재 남은 가격
+            // 현재 idx 자리 숫자의 가격
+            int idx_price = map[nums[idx]];
+            rest += idx_price;
+            // 현재 자리에서 구매가능한 가장 큰 값
+            int max = -1, selected_price = 0;
+            for(int i = 0; i < N; i ++){
+                if(max < p[i].n && rest >= p[i].p){
+                    max = p[i].n;
+                    selected_price = p[i].p;
+                }
+            }
+            nums[idx] = max;
+            rest -= selected_price;
+        }
+
+        if(nums.length == 0){
+            System.out.println(0);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for(int n : nums){
+            sb.append(n);
+        }
+        System.out.println(sb.toString());
     }
 }
