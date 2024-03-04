@@ -1,58 +1,74 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
-    public static class People{
-        long min, max, rest;
-        public People(long min, long max, long rest) { this.min = min; this.max = max; this.rest = rest; }
-    }
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+
+    int N, T, min = 0, max = 0;
+    int[][] arr;
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
-        int n = Integer.parseInt(st.nextToken());
-        long t = Long.parseLong(st.nextToken());
-        People[] arr = new People[n];
+        N = Integer.parseInt(st.nextToken());
+        T = Integer.parseInt(st.nextToken());
+        arr = new int[N][2];
 
-        long sum_min = 0, sum_max = 0;
-        long left = sum_min, right = sum_max;
-        for(int i = 0; i < n; i ++){
+        for(int i = 0; i < N; i ++){
             st = new StringTokenizer(br.readLine(), " ");
-            int s = Integer.parseInt(st.nextToken());
-            int e = Integer.parseInt(st.nextToken());
 
-            sum_min += s;
-            sum_max += e;
-            left = Math.max(s, left);
-            right = Math.max(e, right);
-            arr[i] = new People(s, e, e - s);
+            int l = Integer.parseInt(st.nextToken());
+            int r = Integer.parseInt(st.nextToken());
+
+            min += l;
+            max += r;
+            arr[i] = new int[] { l, r };
         }
+        solve();
+    }
 
-        if(sum_min > t || sum_max < t){
+    public void solve() {
+        int l = 1, r = 1000000000;
+        if(min > T || max < T){
             System.out.println(-1);
             return;
         }
 
-        long answer = 987654321;
-        while(left <= right){
-            long mid = (right + left) / 2;
-            long temp = t;
-            long rest = 0;
-            for(int i = 0; i < n; i ++){
-                temp -= arr[i].min;
-                rest += Math.min(mid - arr[i].min, arr[i].rest);
-            }
-
-            if(rest >= temp){
-                answer = Math.min(mid, answer);
-                right = mid - 1;
+        int answer = 987654321;
+        while(l <= r){
+            int mid = (r + l) / 2;
+            if(check(mid)){
+                r = mid - 1;
+                answer = Math.min(answer, mid);
             }else{
-                left = mid + 1;
+                l = mid + 1;
             }
         }
 
-        System.out.println(answer == 987654321 ? -1 : answer);
+        System.out.println(answer);
+    }
+
+    public boolean check(int mid){
+        // 남은 술통의 양
+        int rest = T - min;
+        for(int i = 0; i < N; i ++){
+            if(arr[i][0] > mid){
+                // 아무리 적게 먹어도 S보다 많이 마셔야하는 인원이 있는 경우
+                return false;
+            }
+            // 최대주량과 S 중 적은 값
+            int p_max = Math.min(arr[i][1], mid) - arr[i][0];
+            rest -= p_max;
+        }
+        return rest <= 0;
     }
 }
+
+
