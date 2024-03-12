@@ -1,7 +1,8 @@
 import java.io.*;
 import java.util.*;
-public class Main{
-    public static void main(String[] args) throws IOException{
+
+class Main {
+    public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
     }
@@ -9,51 +10,49 @@ public class Main{
 
 class Solution {
 
-    String s, s1, s2;
+    int[][] dp;
+    char[][] arr;
 
-    public void solution() throws IOException{
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s = br.readLine();
 
-        s = br.readLine();
-        s1 = br.readLine();
-        s2 = br.readLine();
+        String s1 = br.readLine();
+        String s2 = br.readLine();
 
-        int[][][] dp = new int[2][s.length() + 1][s1.length() + 1];
-        for(int i = 0; i < 2; i ++)
-            for(int j = 0; j < s.length(); j ++)
-                Arrays.fill(dp[i][j], -1);
+        arr = new char[2][s1.length()];
+        for(int j = 0; j < s1.length(); j ++){
+            arr[0][j] = s1.charAt(j);
+        }
 
-        int angel = dfs(0, 0, 0, dp);
-        int devil = dfs(0, 0, 1, dp);
+        for(int j = 0; j < s2.length(); j ++){
+            arr[1][j] = s2.charAt(j);
+        }
 
-        System.out.println(angel + devil);
+        int start_s1 = solve(0, s, s1, s2);
+        int start_s2 = solve(1, s, s1, s2);
+
+        System.out.println(start_s1 + start_s2);
     }
 
-    public int dfs(int depth, int idx, int flag, int[][][] dp){
-        if(depth == s.length()){
-            return 1;
-        }
+    public int solve(int start, String s, String s1, String s2){
+        dp = new int[s.length() + 1][s1.length() + 1];
+        Arrays.fill(dp[0], 1);
 
-        if(dp[flag][depth][idx] != -1){
-            return dp[flag][depth][idx];
-        }
+        for(int i = 1; i <= s.length(); i ++){
+            for(int j = 1; j <= arr[start].length; j ++){
+                char c1 = s.charAt(i - 1);
+                char c2 = arr[start][j - 1];
 
-        dp[flag][depth][idx] = 0;
-        if(flag == 0){
-            for(int i = idx; i < s1.length(); i ++){
-                if(s.charAt(depth) == s1.charAt(i)){
-                    dp[flag][depth][idx] += dfs(depth + 1, i + 1, 1, dp);
+                if(c1 == c2){
+                    dp[i][j] = dp[i - 1][j - 1] + dp[i][j - 1];
+                }else{
+                    dp[i][j] = dp[i][j - 1];
                 }
             }
-        }else{
-            for(int i = idx; i < s2.length(); i ++){
-                if(s.charAt(depth) == s2.charAt(i)){
-                    dp[flag][depth][idx] += dfs(depth + 1, i + 1, 0, dp);
-                }
-            }
+            start = (start + 1) % 2;
         }
 
-        return dp[flag][depth][idx];
+        return dp[s.length()][s1.length()];
     }
 }
-
