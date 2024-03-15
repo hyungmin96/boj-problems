@@ -1,8 +1,7 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-
+class Main {
     public static void main(String[] args) throws IOException {
         Solution sol = new Solution();
         sol.solution();
@@ -11,83 +10,96 @@ public class Main {
 
 class Solution {
 
-    int N;
-
     public class Pair{
         int idx;
-        String str;
-        public Pair(int idx, String str){
+        String s;
+        public Pair(int idx, String s){
             this.idx = idx;
-            this.str = str;
+            this.s = s;
         }
     }
 
-    public void solution() throws IOException{
+    int N;
+    Pair[] words;
+    String[] origin;
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         N = Integer.parseInt(br.readLine());
-
-        Pair[] arr = new Pair[N];
-        String[] order = new String[N];
+        words = new Pair[N];
+        origin = new String[N];
         for(int i = 0; i < N; i ++){
-            String str = br.readLine();
-            arr[i] = new Pair(i, str);
-            order[i] = str;
+            words[i] = new Pair(i, br.readLine());
+            origin[i] = words[i].s;
+        }
+
+        int len = 0, l = 0, r = 100;
+        while(l <= r){
+            int mid = (r + l) / 2;
+            if(check(mid)){
+                len = mid;
+                l = mid + 1;
+            }else{
+                r = mid - 1;
+            }
         }
         
-        Arrays.sort(arr, new Comparator<>(){
-             @Override
-            public int compare(Pair p1, Pair p2){
-                if(p1.str.compareTo(p2.str) == 0)
-                    return p1.idx - p2.idx;
+        ArrayList<int[]> list = new ArrayList<>();
+        HashMap<String, Integer> map = new HashMap<>();
+        for(int i = 0; i < N; i ++){
+            if(words[i].s.length() < len){
+                continue;
+            }
+            String s = words[i].s.substring(0, len);
+            if(map.containsKey(s)){
+                int n1 = words[i].idx;
+                int n2 = map.get(s);
 
-                return p1.str.compareTo(p2.str);
+                list.add(new int[] { Math.min(n1, n2), Math.max(n1, n2) });
+                map.put(s, Math.min(map.get(s), words[i].idx));
+            }
+            map.put(s, words[i].idx);
+        }
+        Collections.sort(list, new Comparator<int[]>(){
+            @Override
+            public int compare(int[] o1, int[] o2){
+                if(o1[0] == o2[0]){
+                    return o1[1] - o2[1];
+                }
+                return o1[0] - o2[0];
             }
         });
-
-        String prefix = "";
-        int prefix_idx = 987654321;
-        for(int i = 0; i < N - 1; i ++){
-            Pair cur = arr[i];
-            Pair next = arr[i + 1];
-            int idx = (cur.idx < next.idx) ? cur.idx : next.idx;
-
-            String cur_prefix = count(cur.str, next.str);
-            if(cur_prefix.length() > prefix.length()){
-                prefix_idx = idx;
-                prefix = cur_prefix;
-            }else if(cur_prefix.length() == prefix.length()){
-                if(prefix_idx > idx){
-                    prefix_idx = idx;
-                    prefix = cur_prefix;
-                }
-            }
-        }
-
-        int cnt = 0;
-        HashSet<String> set = new HashSet<>();
-        StringBuilder sb = new StringBuilder();
-        for(String o : order){
-            if(cnt == 2) break;
-            if(o.length() < prefix.length() || set.contains(o)) continue;
-            if(o.substring(0, prefix.length()).equals(prefix)){
-                set.add(o);
-                sb.append(o + "\n");
-                cnt ++;
-            }
-        }
-
-        System.out.println(sb.toString());
+        System.out.println(origin[list.get(0)[0]]);
+        System.out.println(origin[list.get(0)[1]]);
     }
 
-    public String count(String str1, String str2){ 
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < Math.min(str1.length(), str2.length()); i ++){
-            if(str1.charAt(i) != str2.charAt(i)){
-                return sb.toString();
+    public boolean check(int mid){
+        HashSet<String> set = new HashSet<>();
+        for(int i = 0; i < N; i ++){
+            if(words[i].s.length() < mid){
+                continue;
             }
-            sb.append(str1.charAt(i));
+
+            String s = words[i].s.substring(0, mid);
+            if(set.contains(s)){
+                return true;
+            }
+            set.add(s);
         }
-        return sb.toString();
+        return false;
     }
 }
 
+
+// 문자열의 수 N <= 20,000
+// 문자열의 길이 <= 200
+
+// 가장 비슷한(서로 다른 2개의 문자열의 공통된 접두사의 길이가 가장 긴) 문자열 S와 T를 출력
+// (S, T)의 순서쌍이 여러개인 경우 S가 먼저 입력된 경우, 이러한 경우가 여러개이면 T가 입력된 순서가 빠른 순서쌍을 출력
+
+// 1. 최대 20,000개의 문자열 중 공통된 접두사의 길이가 가장 긴 문자열 탐색방법
+//  - O(log n) | O(n) | O(n log n) 의 복잡도를 가진 알고리즘으로 탐색해야함
+//  - 문자열을 정렬할 경우
+//   : ab
+//   : acaabcde
+//   : acb
+// answer : 'ac'
