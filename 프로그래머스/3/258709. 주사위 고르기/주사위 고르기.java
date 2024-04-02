@@ -1,88 +1,103 @@
 import java.util.*;
 class Solution {
-    
-    int[] answer;
-    int cur_win = -987654321;
     boolean[] v;
-    ArrayList<int[]> a_dice = new ArrayList<>();
-    ArrayList<int[]> b_dice = new ArrayList<>();
-    
+    int[] answer;
+    int win_cnt = 0;
     public int[] solution(int[][] dice) {
         v = new boolean[dice.length];
         answer = new int[dice.length / 2];
-        dfs(0, 0, dice);
-        
-        for(int i = 0; i < a_dice.size(); i ++){
-            int[] aa = a_dice.get(i);
-            int[] bb = b_dice.get(i);
-            ArrayList<Integer> a_comb = getAllNums(0, 0, aa, new ArrayList<>(), dice);
-            ArrayList<Integer> b_comb = getAllNums(0, 0, bb, new ArrayList<>(), dice);    
-            
-            Collections.sort(a_comb);
-            Collections.sort(b_comb);
-            
-            int win_cnt = 0;
-            for(int a_num : a_comb){
-                win_cnt += lowerBound(a_num, b_comb);
-            }
-            
-            if(cur_win < win_cnt){
-                cur_win = win_cnt;
-                for(int k = 0; k < dice.length / 2; k ++){
-                    answer[k] = aa[k] + 1;
-                }
-            }
-        }
-        
+        combi(0, 0, dice);
         return answer;
     }
     
-    public int lowerBound(int val, ArrayList<Integer> list){
-        int l = 0, r = list.size() - 1;
+    public void combi(int depth, int idx, int[][] dice){
+        if(depth == dice.length / 2){
+            get_sum(dice);
+            return;
+        }
+        for(int i = idx; i < dice.length; i ++){
+            v[i] = true;
+            combi(depth + 1, i + 1, dice);
+            v[i] = false;
+        }
+    }
+    
+    public void get_sum(int[][] dice){
+        ArrayList<Integer> a = new ArrayList<>();
+        ArrayList<Integer> b = new ArrayList<>();
+        
+        int a_idx = 0, b_idx = 0;
+        int[] a_dice = new int[dice.length / 2];
+        int[] b_dice = new int[dice.length / 2];
+        for(int i = 0; i < dice.length; i ++){
+            if(v[i]){
+               a_dice[a_idx++] = i; 
+            }else{
+                b_dice[b_idx++] = i;
+            }
+        }
+        
+        a_dfs(0, 0, a, a_dice, dice);
+        b_dfs(0, 0, b, b_dice, dice);
+        
+        Collections.sort(a);
+        Collections.sort(b);
+        
+        int cnt = 0;
+        for(int i = 0; i < a.size(); i ++){
+            int a_cur = a.get(i);
+            cnt += lower_bound(a_cur, b);
+        }
+        
+        if(win_cnt < cnt){
+            win_cnt = cnt;
+            for(int j = 0; j < a_dice.length; j ++){
+                answer[j] = a_dice[j] + 1;
+            }
+        }
+    }
+    
+    public int lower_bound(int cur, ArrayList<Integer> b){
+        int l = 0, r = b.size() - 1;
         while(l <= r){
             int mid = (r + l) / 2;
-            if(list.get(mid) >= val){
+            if(b.get(mid) >= cur){
                 r = mid - 1;
             }else{
                 l = mid + 1;
             }
         }
+        
         return l;
     }
     
-    public ArrayList<Integer> getAllNums(int depth, int cur, int[] arr, ArrayList<Integer> list, int[][] dice){
-        if(depth == arr.length){
+    public void a_dfs(int depth, int cur, ArrayList<Integer> list, int[] a_dice, int[][] dice){
+        if(depth == a_dice.length){
             list.add(cur);
-            return list;
+            return;
         }
         
         for(int i = 0; i < 6; i ++){
-            getAllNums(depth + 1, cur + dice[arr[depth]][i], arr, list, dice);
+            a_dfs(depth + 1, cur + dice[a_dice[depth]][i], list, a_dice, dice);
         }
-        return list;
     }
-
-    public void dfs(int depth, int idx, int[][] dice) {
-        if (depth == dice.length / 2) {
-            int a_idx = 0, b_idx = 0;
-            int[] a_arr = new int[dice.length / 2];
-            int[] b_arr = new int[dice.length / 2];
-            for(int i = 0; i < v.length; i ++){
-                if(v[i]){
-                    a_arr[a_idx++] = i;
-                }else{
-                    b_arr[b_idx++] = i;
-                }
-            }
-            a_dice.add(a_arr);
-            b_dice.add(b_arr);
+    
+     public void b_dfs(int depth, int cur, ArrayList<Integer> list, int[] b_dice, int[][] dice){
+        if(depth == b_dice.length){
+            list.add(cur);
             return;
         }
-
-        for (int i = idx; i < dice.length; i++) {
-            v[i] = true;
-            dfs(depth + 1, i + 1, dice);
-            v[i] = false;
+        
+        for(int i = 0; i < 6; i ++){
+            b_dfs(depth + 1, cur + dice[b_dice[depth]][i], list, b_dice, dice);
         }
     }
 }
+
+// A와 B가 주사위를 가지는 경우의 수 => n! / n! * (n - r)! => 최대 252가지.
+// 주사위를 5개씩 나눠 가졌을 때 나올 수 있는 경우의 수 => 15,625
+
+// 주사위의 조합을 구하기
+// 구한 주사위에서 나올 수 있는 모든 경우의 수 구하기
+// 
+
