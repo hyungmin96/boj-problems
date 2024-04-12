@@ -1,77 +1,85 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
-public class Main {
-
-    static int max_node = -1;
-    static long max_dis;
-    static int N, temp_cur, temp_node, temp_dis;
-    static long[] dist;
-    static boolean[] v;
-    static int[][] edge;
-    static ArrayList<int[]>[] graph;
-
+class Main {
     public static void main(String[] args) throws IOException {
+        Solution sol = new Solution();
+        sol.solution();
+    }
+}
+
+class Solution {
+	
+	int N;
+	int[][] edge;
+	boolean[] v;
+	long[] dist;
+	ArrayList<int[]>[] nodes;
+
+    public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        
-        N = Integer.parseInt(br.readLine());
-        edge = new int[N][3];
-        dist = new long[N];
-        graph = new ArrayList[N];
+		N = Integer.parseInt(br.readLine());
+		nodes = new ArrayList[N];
+		edge = new int[N - 1][3];
+		dist = new long[N];
+		for(int i = 0; i < N; i ++){
+			nodes[i] = new ArrayList<>();
+		}
 
-        for(int i = 0; i < N; i ++) graph[i] = new ArrayList<>();
-        for(int i = 0; i < N - 1; i ++){
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
-            int cost = Integer.parseInt(st.nextToken());
+		for(int i = 0; i < N - 1; i ++){
+			StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+			int from = Integer.parseInt(st.nextToken());
+			int to = Integer.parseInt(st.nextToken());
+			int cost = Integer.parseInt(st.nextToken());
 
-            edge[i] = new int[] { from, to, cost };
-            graph[from].add(new int[] { to, cost });
-            graph[to].add(new int[] { from, cost });
-        }
+			nodes[from].add(new int[] { to, cost });
+			nodes[to].add(new int[] { from, cost });
+			
+			edge[i] = new int[] { from , to, cost };
+		}
 
-        long answer = 0;
-        for(int i = 0; i < edge.length - 1; i ++){
+		long max = Integer.MIN_VALUE;
+		for(int[] e : edge){
+			int cost = e[2];
+			
+			v = new boolean[N];
+			int n1 = dfs(e[0], e[0], e[1]);
 
-            int t1 = edge[i][0];
-            int t2 = edge[i][1];
-            int cost = edge[i][2];
+			v = new boolean[N];
+			dfs(n1, e[0], e[1]);
+			// int n2 = dfs(n1, e[0], e[1]);
+			// long t1 = dist[n2];
 
-            // 입력으로 주어진 간선 중 하나를 잘라 별도의 트리로 만듦
-            v = new boolean[N];
-            int node1 = dfs(t1, edge[i]);
+			v = new boolean[N];
+			int n2 = dfs(e[1], e[0], e[1]);
 
-            v = new boolean[N];
-            dfs(node1, edge[i]);
+			v = new boolean[N];
+			dfs(n2, e[0], e[1]);
+			// n2 = dfs(n1, e[0], e[1]);
+			// long t2 = dist[n2];
 
-            v = new boolean[N];
-            int node2 = dfs(t2, edge[i]);
+			max = Math.max(max, dist[n1] + dist[n2] + cost);
+		}
+		System.out.println(max);
+	}
 
-            v = new boolean[N];
-            dfs(node2, edge[i]);
-
-            answer = Math.max(answer, dist[node1] + dist[node2] + cost);
-        }
-        System.out.println(answer);
-    }
-
-    // 현재 node에서 가장 멀리있는(가중치가 큰) 노드 탐색
-    public static int dfs(int node, int[] edge){
-        v[node] = true;
-        int lastNode = node;
-        dist[node] = 0;
-        for(int[] next : graph[node]){
-            if ((node == edge[0] && next[0] == edge[1]) || (node == edge[1] && next[0] == edge[0])) continue;
-                if(v[next[0]]) continue;
-                v[next[0]] = true;
-                int cur = dfs(next[0], edge);
-                if(dist[node] < dist[next[0]] + next[1]){
-                    dist[node] = dist[next[0]] + next[1];
-                    lastNode = cur;
-                }
-        }
-
-        return lastNode;
-    }
+	public int dfs(int node, int e1, int e2){
+		dist[node] = 0;
+		v[node] = true;
+		int cur_node = node;
+		for(int[] next : nodes[node]){
+			if((e1 == next[0] && e2 == node) || (e1 == node && e2 == next[0])){
+				continue;
+			}
+			if(v[next[0]]){
+				continue;
+			}
+			int tmp_node = dfs(next[0], e1, e2);
+			if(dist[node] < dist[next[0]] + next[1]){
+				dist[node] = dist[next[0]] + next[1];
+				cur_node = tmp_node;
+			}
+		}
+		return cur_node;
+	}
 }
