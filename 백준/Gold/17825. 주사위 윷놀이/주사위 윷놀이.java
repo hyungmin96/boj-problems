@@ -10,77 +10,75 @@ class Main {
 
 class Solution {
 
-    int answer = 0;
-    int[] pos_arr = new int[4];
-    int[] level = new int[4];
-    int[] dice = new int[10];
+    int[] arr = new int[10];
+    
+    int[][] road = {{ 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40 },
+                    { 0,2,4,6,8,10,13,16,19,25,30,35,40 },
+                    { 0,2,4,6,8,10,12,14,16,18,20,22,24,25,30,35,40 },
+                    { 0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,28,27,26,25,30,35,40 }};
+    
     boolean[][] v = new boolean[4][30];
-    boolean[] isEnd = new boolean[4];
-
-    int[][] map = {
-        {0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40},
-        {0,2,4,6,8,10,13,16,19,25,30,35,40},
-        {0,2,4,6,8,10,12,14,16,18,20,22,24,25,30,35,40},
-        {0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,28,27,26,25,30,35,40}
-    };
 
     public void solution() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-
         for(int i = 0; i < 10; i ++){
-            dice[i] = Integer.parseInt(st.nextToken());
+            arr[i] = Integer.parseInt(st.nextToken());
         }
 
-        System.out.println(dfs(0, 0));
+        solve();
     }
 
-    public int dfs(int depth, int score){
+    public void solve(){
+        System.out.println(dfs(0, new int[4], new int[4]));
+    }
+
+    public int dfs(int depth, int[] road_idx, int[] pos){
         if(depth == 10){
-            return score;
+            return 0;
         }
 
         int ret = 0;
         for(int i = 0; i < 4; i ++){
-            int nl = level[i];
-            int move_cnt = dice[depth];
-            int pl = level[i];
-            int pp = pos_arr[i];
+            int pre = pos[i];
             
-            if(pos_arr[i] >= map[nl].length){
+            if(pos[i] >= road[road_idx[i]].length){
                 continue;
             }
+            pos[i] += arr[depth];
+            int tmp_road_idx = road_idx[i];
+            if(road_idx[i] == 0 && pos[i] == 5){
+                // 10번 발판을 밟는 경우
+                road_idx[i] = 1;
+            }else if(road_idx[i] == 0 && pos[i] == 10){
+                // 20번 발판을 밟는 경우
+                road_idx[i] = 2;
+            }else if(road_idx[i] == 0 && pos[i] == 15){
+                // 30번 발판을 밟는 경우
+                road_idx[i] = 3;
+            }
 
-            pos_arr[i] += move_cnt;
-            if(level[i] == 0){
-                if(pos_arr[i] == 5){
-                    nl = 1;
-                }else if(pos_arr[i] == 10){
-                    nl = 2;
-                }else if(pos_arr[i] == 15){
-                    nl = 3;
-                }
+            if(!is_invalid(i, road_idx, pos)){
+                v[tmp_road_idx][pre] = false;
+                v[road_idx[i]][pos[i]] = true;
+                int s = pos[i] < road[road_idx[i]].length ? road[road_idx[i]][pos[i]] : 0;
+                ret = Math.max(ret, dfs(depth + 1, road_idx, pos) + s);
+                v[tmp_road_idx][pre] = true;
+                v[road_idx[i]][pos[i]] = false;
             }
-            if(!isImpossible(i, nl, pos_arr[i])){
-                level[i] = nl;
-                v[pl][pp] = false;
-                v[nl][pos_arr[i]] = true;
-                
-                int num = pos_arr[i] < map[nl].length ? map[nl][pos_arr[i]] : 0;
-                ret = Math.max(ret, dfs(depth + 1, score + num));
-                
-                v[nl][pos_arr[i]] = false;
-                v[pl][pp] = true;
-                level[i] = pl;
-            }
-            pos_arr[i] = pp;
+
+            pos[i] = pre;
+            road_idx[i] = tmp_road_idx;
         }
         return ret;
     }
 
-    public boolean isImpossible(int idx, int lv, int pos){
-        if(pos >= map[lv].length) return false;
-
+    public boolean is_invalid(int idx, int[] road_idx, int[] positions){
+        int pos = positions[idx];
+        int lv = road_idx[idx];
+        if(pos >= road[lv].length){
+            return false;
+        }
         if((lv == 1 && pos == 9) || (lv == 2 && pos == 13) || (lv == 3 && pos == 19)){
             //25
             return v[1][9] || v[2][13] || v[3][19];
@@ -97,10 +95,11 @@ class Solution {
 
         for(int i = 0; i < 4; i ++){
             if(i == idx) continue;
-            if(level[i] == lv && pos_arr[i] == pos){
+            if(road_idx[i] == lv && positions[i] == pos){
                 return true;
             }
         }
+
         return false;
     }
 }
