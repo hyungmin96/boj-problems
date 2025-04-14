@@ -1,80 +1,82 @@
 import java.io.*;
 import java.util.*;
-
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        Solution sol = new Solution();
-        sol.solution();
-    }
-}
+    static int N, M;
+    static int[][] map;
+    static int[][] dirs = {
+        {-1,0},{0,1},{1,0},{0,-1}
+    };
 
-class Solution {
-
-    int N, M;
-    boolean[][][] v;
-    int[][] map, dirs = {{ -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 }, { 0, 0 }};
-
-    public void solution() throws IOException{
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
         map = new int[N][M];
 
-        int max_height = 0;
+        int maxHeight = 0;
         for(int i = 0; i < N; i ++){
-            String str = br.readLine();
+            String s = br.readLine();
             for(int j = 0; j < M; j ++){
-                map[i][j] = str.charAt(j) - '0';
-                max_height = Math.max(max_height, map[i][j]);
+                map[i][j] = s.charAt(j) - '0';
+                maxHeight = Math.max(maxHeight, map[i][j]);
             }
         }
 
         int answer = 0;
-        v = new boolean[max_height + 1][N][M];
-        for(int h = 1; h <= max_height; h ++){
-            for(int r = 1; r < N; r ++){
-                for(int c = 1; c < M; c ++){
-                    if(map[r][c] >= h || v[h][r][c]) continue;
-                    answer += bfs(r, c, h);
+        for(int h = 1; h <= maxHeight; h ++){
+            boolean[][] v = new boolean[N][M];
+            for(int r = 1; r < N - 1; r ++){
+                for(int c = 1; c < M - 1; c ++){
+                    if(!v[r][c] && map[r][c] <= h){
+                        int tmp = bfs(r, c, h, v);
+                        answer += tmp;
+                    }
                 }
             }
         }
-
         System.out.println(answer);
     }
 
-    public int bfs(int r, int c, int height){
+    public static int bfs(int r, int c, int h, boolean[][] v){
         Queue<int[]> q = new LinkedList<>();
-        q.offer(new int[] { r, c });
-        v[height][r][c] = true;
 
-        int cnt = 1;
+        v[r][c] = true;
+        q.offer(new int[] { r, c, h });
+
+        int cnt = 0;    
         boolean flag = true;
         while(!q.isEmpty()){
+            cnt ++;
             int[] cur = q.poll();
             for(int d = 0; d < 4; d ++){
                 int nr = cur[0] + dirs[d][0];
                 int nc = cur[1] + dirs[d][1];
-                if(nr < 0 || nc < 0 || nr >= N || nc >= M) {
+                
+                if(isOutRange(nr, nc)){
                     flag = false;
                     continue;
                 }
-                if(map[nr][nc] >= height) continue;
-                if(v[height][nr][nc]) continue;
-                v[height][nr][nc] = true;
 
-                cnt ++;
-                q.offer(new int[] { nr, nc });
+                if(v[nr][nc]){
+                    continue;
+                }
+
+                if(map[nr][nc] <= h){
+                    v[nr][nc] = true;
+                    q.offer(new int[] { nr, nc, h });
+                }
             }
         }
+        if(!flag) 
+            return 0;
+            
+        return cnt;
+    }
 
-        if(flag)
-            return cnt;
-
-        return 0;
+    public static boolean isOutRange(int r, int c){
+        return r < 0 || c < 0 || r >= N || c >= M;
     }
 }
-
