@@ -1,31 +1,33 @@
 import java.io.*;
 import java.util.*;
+public class Main{
 
-public class Main {
-
-    public static void main(String[] args) throws IOException {
-        StringBuilder sb = new StringBuilder();
+    static int tc = 0;
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int tc = Integer.parseInt(br.readLine());
-        for(int i = 0; i < tc; i ++){
-            int k = Integer.parseInt(br.readLine());
 
-            PriorityQueue<Long> pq = new PriorityQueue<>();
+        tc = Integer.parseInt(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        while(tc -- > 0){
+            int n = Integer.parseInt(br.readLine());
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j < k; j ++){
+            PriorityQueue<Long> pq = new PriorityQueue<>();
+            for(int i = 0; i < n; i ++){
                 pq.offer(Long.parseLong(st.nextToken()));
             }
 
-            long total = 0;
+            long answer = 0;
             while(pq.size() > 1){
-                long a = pq.poll();
-                long b = pq.poll();
-                pq.offer(a + b);
-                total += a + b;
+                long n1 = pq.poll();
+                long n2 = pq.poll();
+
+                answer += n1 + n2;
+                pq.offer(n1 + n2);
             }
 
-            sb.append(total + "\n");
+            sb.append(answer + "\n");
         }
+
         System.out.println(sb.toString());
     }
 }
