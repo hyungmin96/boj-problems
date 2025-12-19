@@ -1,26 +1,35 @@
+## 1. 1시간 기다려서 알고력 올리기
+## 2. 1시간 기다려서 코딩력 올리기
+## 3. 문제풀기
+import sys
+sys.setrecursionlimit(1000)
 def solution(alp, cop, problems):
-    answer = float('INF')
+    answer = 0
+    dp = [[100001] * 231 for _ in range(231)]
+    max_alp, max_cop = -1,-1
+    for p in problems:
+        max_alp = max(max_alp, p[0])
+        max_cop = max(max_cop, p[1])
     
-    max_alp, max_cop = alp, cop
-    for i in range(len(problems)):
-        alp_req, cop_req, alp_rwd, cop_rwd, cost = problems[i]
+    dp[max_alp][max_cop] = 0
+    
+    alp = min(alp, max_alp)
+    cop = min(cop, max_cop)
+    def dfs(cur_alp, cur_cop):
+        cur_alp = min(cur_alp, max_alp)
+        cur_cop = min(cur_cop, max_cop)
         
-        max_alp = max(max_alp, alp_req)
-        max_cop = max(max_cop, cop_req)
+        if dp[cur_alp][cur_cop] != 100001:
+            return dp[cur_alp][cur_cop]
+
+        dp[cur_alp][cur_cop] = 100002
+        dp[cur_alp][cur_cop] = min(dp[cur_alp][cur_cop], dfs(cur_alp+1, cur_cop) + 1)
+        dp[cur_alp][cur_cop] = min(dp[cur_alp][cur_cop], dfs(cur_alp, cur_cop+1) + 1)
         
-    dp = [[float('INF')] * 301 for _ in range(301)]
-    dp[alp][cop] = 0
+        for alp_req, cop_req, alp_rwd, cop_rwd, cost in problems:
+            if alp_req <= cur_alp and cop_req <= cur_cop:
+                dp[cur_alp][cur_cop] = min(dp[cur_alp][cur_cop], dfs(cur_alp+alp_rwd, cur_cop+cop_rwd) + cost)
+        
+        return dp[cur_alp][cur_cop]
     
-    for i in range(alp, 151):
-        for j in range(cop, 151):
-            for k in range(len(problems)):
-                dp[i+1][j] = min(dp[i+1][j], dp[i][j] + 1) #cop
-                dp[i][j+1] = min(dp[i][j+1], dp[i][j] + 1) #alp
-                alp_req, cop_req, alp_rwd, cop_rwd, cost = problems[k]
-                
-                if alp_req <= i and cop_req <= j:
-                    next_alp = min(i+alp_rwd, max_alp)
-                    next_cop = min(j+cop_rwd, max_cop)
-                    dp[next_alp][next_cop] = min(dp[next_alp][next_cop], dp[i][j] + cost)
-    
-    return dp[max_alp][max_cop]
+    return dfs(alp, cop)
