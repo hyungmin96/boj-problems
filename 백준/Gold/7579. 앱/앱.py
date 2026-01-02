@@ -1,21 +1,29 @@
 import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(100001)
 
-N, M = map(int, input().split(" "))
+N, M = map(int, input().split())
 mem = list(map(int, input().split()))
 cost = list(map(int, input().split()))
 
-dp = [[0 for j in range(10001)] for i in range(N + 1)]
+dp = [[-1] * (10001) for _ in range(N+1)]
 
-answer = 9876543210
-for i in range(1, N + 1):
-    cur_mem = mem[i-1]
-    cur_cost = cost[i-1]
-    for j in range(0, 10001):
-        if(j >= cur_cost):
-            dp[i][j] = max(dp[i][j], dp[i - 1][j - cur_cost] + cur_mem)
-            
-        dp[i][j] = max(dp[i][j], dp[i-1][j])
-        if(dp[i][j] >= M):
-            answer = min(answer, j)
+## 앱, 비용 : 얻을 수 있는 최대 메모리 값
+def dfs(depth, cur):
+    if depth == N:
+        return 0
+    
+    if dp[depth][cur] != -1:
+        return dp[depth][cur]
+    
+    dp[depth][cur] = 0
+    if cur >= cost[depth]:
+        dp[depth][cur] = max(dp[depth][cur], dfs(depth+1, cur - cost[depth]) + mem[depth])
+    dp[depth][cur] = max(dp[depth][cur], dfs(depth+1, cur))
 
-print(answer)
+    return dp[depth][cur]
+
+for i in range(10001):
+    if dfs(0, i) >= M:
+        print(i)
+        break
