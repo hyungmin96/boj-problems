@@ -1,25 +1,18 @@
 def solution(info, n, m):
-    answer = 987654321
-    v = set()
-    def dfs(depth, a_cnt, b_cnt, n, m, info, v):
-        nonlocal answer
-        if a_cnt >= n or b_cnt >= m:
-            return 
+    dp = [[-1] * m for _ in range(len(info))]
+    def dfs(depth, m_cnt):
+        if depth == len(info):
+            return 0
         
-        if depth >= len(info):
-            answer = min(a_cnt, answer)
-            return
+        if dp[depth][m_cnt] != -1:
+            return dp[depth][m_cnt]
         
-        if (depth, a_cnt, b_cnt) in v:
-            return
+        res = dfs(depth + 1, m_cnt) + info[depth][0]
+        if m_cnt + info[depth][1] < m:
+            res = min(res, dfs(depth + 1, m_cnt + info[depth][1]))
         
-        v.add((depth, a_cnt, b_cnt))
-        dfs(depth + 1, a_cnt + info[depth][0], b_cnt, n, m, info, v)
-        dfs(depth + 1, a_cnt, b_cnt + info[depth][1], n, m, info, v)
+        dp[depth][m_cnt] = res
+        return res
     
-        return
-    
-    dfs(0, 0, 0, n, m, info, v)
-    if answer == 987654321:
-        answer = -1
-    return answer
+    ans = dfs(0, 0)
+    return -1 if ans >= n else ans
