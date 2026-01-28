@@ -1,66 +1,55 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
+public class Main{
+	static final int INF = Integer.MAX_VALUE;
+	static int N, M, S, D;
+	static ArrayList<int[]>[] nodes;
 
-    static class Pair{
-        int s, e;
-        long cost;
-        public Pair(int s, int e, long cost) { this.s = s; this.e = e; this.cost = cost; }
-    }
+	public static void main(String[] args) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
 
-    static int N, M;
-    static ArrayList<Pair>[] vertex;
-    static boolean[] check;
-    static boolean flag;
+		nodes = new ArrayList[N + 1];
+		for(int i = 0; i <= N; i ++){ nodes[i] = new ArrayList<>(); }
+		for(int i = 0; i < M; i ++){
+			st = new StringTokenizer(br.readLine(), " ");
+			int from = Integer.parseInt(st.nextToken());
+			int to = Integer.parseInt(st.nextToken());
+			int weight = Integer.parseInt(st.nextToken());
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-        vertex = new ArrayList[N + 1];
+			nodes[from].add(new int[] { to, weight });
+			nodes[to].add(new int[] { from, weight });
+		}
+		st = new StringTokenizer(br.readLine(), " ");
+		S = Integer.parseInt(st.nextToken());
+		D = Integer.parseInt(st.nextToken());
 
-        long left = 0, right = 1000000000;
-        for(int i = 1; i <= N; i ++) vertex[i] = new ArrayList<>();
-        for(int i = 0; i < M; i ++){
-            st = new StringTokenizer(br.readLine(), " ");
-            int s = Integer.parseInt(st.nextToken());
-            int e = Integer.parseInt(st.nextToken());
-            long cost = Integer.parseInt(st.nextToken());
-            vertex[s].add(new Pair(s, e, cost));
-            vertex[e].add(new Pair(e, s, cost));
-        }
+		System.out.println(bfs());
+	}
 
-        st = new StringTokenizer(br.readLine(), " ");
-        int c1 = Integer.parseInt(st.nextToken());
-        int c2 = Integer.parseInt(st.nextToken());
-        while(left <= right){
-            flag = false;
-            check = new boolean[N + 1];
-            check[c1] = true;
-            long mid = (right + left) / 2;
-            dfs(c1, c2, mid);
-            if(flag){
-                left = mid + 1;
-            }else{
-                right = mid - 1;
-            }
-        }
-        System.out.println(right);
-    }
+	public static int bfs(){
+		int[] dp = new int[N + 1];
+		PriorityQueue<int[]> pq = new PriorityQueue<>(new Comparator<int[]>(){
+			@Override
+			public int compare(int[] o1, int[] o2){
+				return o2[1] - o1[1];
+			}
+		});
+		pq.offer(new int[] { S, INF });
+		while(!pq.isEmpty()){
+			int[] cur = pq.poll();
+			if(cur[0] == D) return dp[D];
+			for(int[] next : nodes[cur[0]]){
+				if(dp[next[0]] < Math.min(cur[1], next[1])){
+					dp[next[0]] = Math.min(cur[1], next[1]);
+					pq.offer(new int[] { next[0], Math.min(cur[1], next[1]) });
+				}
+			}
+		}
 
-    public static void dfs(int start, int node, long cur){
-        if(start == node){
-            flag = true;
-            return;
-        }
-        for(Pair next : vertex[start]){
-            if(next.cost < cur) continue;
-            if(!check[next.e]){
-                check[next.e] = true;
-                dfs(next.e, node, cur);
-            }
-        }
-    }
+		return -1;
+	}
 }
