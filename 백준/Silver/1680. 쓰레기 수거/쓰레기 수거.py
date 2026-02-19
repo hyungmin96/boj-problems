@@ -1,28 +1,24 @@
 import sys
 input = sys.stdin.readline
 
-ans = []
-T = int(input().strip())
+T = int(input())
 for _ in range(T):
+
     W, N = map(int, input().strip().split())
-    arr = []
-    for _ in range(N):
-        d, w = map(int, input().strip().split())
-        arr.append((d, w))
+    cur, tmp, dist = 0, 0, 0
 
-    total_dist, idx, cur = 0, 0, 0
-    while idx < len(arr):
-        d, w = arr[idx]
-        if idx < len(arr) - 1 and cur + w < W:
-            cur += w
+    for i in range(N):
+        x, w = map(int, input().strip().split())
+        dist += (x - cur)
+        cur = x
+
+        if tmp + w == W:
+            tmp, cur = 0, 0
+            dist += x
+        elif tmp + w > W:
+            tmp = w
+            dist += (2 * x)
         else:
-            if cur + w > W:
-                idx -= 1
+            tmp += w
 
-            cur = 0
-            total_dist += d * 2
-        idx += 1
-
-    ans.append(total_dist)
-
-print("\n".join(map(str, ans)))
+    print(dist + cur)
