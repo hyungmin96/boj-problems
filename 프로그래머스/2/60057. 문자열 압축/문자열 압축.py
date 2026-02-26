@@ -1,28 +1,22 @@
 def solution(s):
-    answer = len(s)
-    
-    def dfs(idx, l):
-        if idx >= len(s):
-            return ""
-        
-        cnt = 1
-        while idx + l < len(s) and s[idx:idx+l] == s[idx+l:idx+l*2]:
+    ans, s_len = len(s), len(s)
+    for l in range(1, s_len // 2 + 1):
+        idx, tmp = 0, []
+        while idx + l <= s_len:
+            cnt, cur = 1, s[idx:idx+l]
+            while idx+l*2 <= s_len and cur == s[idx+l:idx+l*2]:
+                idx += l
+                cnt += 1
             idx += l
-            cnt += 1
-        
-        tmp = ""
-        if cnt > 1:
-            tmp = str(cnt)
-        
-        if idx + l > len(s):
-            tmp += s[idx:]
-        else:
-            tmp += s[idx:idx+l]
-        
-        return tmp + dfs(idx+l, l)
             
-    
-    for i in range(1, len(s) // 2 + 1):
-        answer = min(answer, len(dfs(0, i)))
-    
-    return answer
+            if cnt > 1:
+                tmp.append(cnt)
+            
+            tmp.append(cur)
+            
+        if idx < s_len:
+            tmp.append(s[idx:])
+            
+        ans = min(ans, len("".join(map(str, tmp))))
+            
+    return ans
