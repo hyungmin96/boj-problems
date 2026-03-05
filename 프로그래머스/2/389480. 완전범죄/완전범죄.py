@@ -1,18 +1,24 @@
 def solution(info, n, m):
-    dp = [[-1] * m for _ in range(len(info))]
-    def dfs(depth, m_cnt):
-        if depth == len(info):
+    dp = [[[-1] * 121 for _ in range(121)] for _ in range(len(info))]
+    def dfs(idx, a, b):
+        if idx >= len(info):
             return 0
         
-        if dp[depth][m_cnt] != -1:
-            return dp[depth][m_cnt]
+        if dp[idx][a][b] != -1:
+            return dp[idx][a][b]
         
-        res = dfs(depth + 1, m_cnt) + info[depth][0]
-        if m_cnt + info[depth][1] < m:
-            res = min(res, dfs(depth + 1, m_cnt + info[depth][1]))
-        
-        dp[depth][m_cnt] = res
-        return res
+        ret = 987654321
+        dp[idx][a][b] = 98654321
+        if a + info[idx][0] < n:
+            ret = min(ret, dfs(idx+1,a+info[idx][0], b) +info[idx][0])
     
-    ans = dfs(0, 0)
-    return -1 if ans >= n else ans
+        if b + info[idx][1] < m:
+            ret = min(ret, dfs(idx+1,a,b+info[idx][1]))
+            
+        dp[idx][a][b] = ret
+        return ret
+    
+    ans = dfs(0,0,0)
+    if ans == 987654321:
+        return -1
+    return ans
