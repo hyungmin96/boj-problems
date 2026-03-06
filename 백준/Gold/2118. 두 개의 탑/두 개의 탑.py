@@ -1,21 +1,17 @@
 import sys
 input = sys.stdin.readline
 
-def solve():
-    N = int(input())
+num = int(input())
+arr = [int(input().strip()) for _ in range(num)]
 
-    arr = [int(input()) for _ in range(N)]
-    total_dist = sum(arr)
+r, cur, ans = 0, 0, 0
+total = sum(arr)
+for l in range(num):
+    while(cur < total // 2):
+        cur += arr[r % num]
+        r += 1
 
-    ans, cur_dist, r = 0, 0, 0
-    for l in range(N):
-        while cur_dist < total_dist - cur_dist:
-            cur_dist += arr[r]
-            r = (r + 1) % N
+    ans = max(ans, min(cur, total - cur))
+    cur -= arr[l]
 
-        ans = max(ans, min(cur_dist, total_dist - cur_dist))
-        cur_dist -= arr[l]
-
-    return ans
-
-print(solve())
+print(ans)
