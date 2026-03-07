@@ -1,28 +1,30 @@
 import sys
 input = sys.stdin.readline
-oper_w = {
-    "+" : 0,
-    "-" : 0,
-    "*" : 1,
-    "/" : 1
-}
-ans, stk, val, rank = [],[], input().strip(), 0
-for ch in list(val):
-    if ch in oper_w:
-        w = oper_w[ch] + rank
-        while len(stk) > 0 and w <= stk[-1][0]:
-            ans.append(stk.pop()[1])
-        
-        stk.append((w, ch))
+
+value = input().strip()
+
+ans = []
+stk, priority, flag = [], {}, 0
+priority["+"] = 0
+priority["-"] = 0
+priority["*"] = 1
+priority["/"] = 1
+for i in range(len(value)):
+    cur = value[i]
+    if cur == '(':
+        flag += 2
+    elif cur == ')':
+        flag -= 2
     else:
-        if ch == '(':
-            rank += 2
-        elif ch == ')':
-            rank -= 2
+        if 'A' <= cur <= 'Z':
+            ans.append(cur)
         else:
-            ans.append(ch)
+            p = priority[cur] + flag
+            while stk and p <= stk[-1][0]:
+                ans.append(value[stk.pop()[1]])
+            stk.append((p, i))
 
 while stk:
-    ans.append(stk.pop()[1])
+    ans.append(value[stk.pop()[1]])
 
 print("".join(map(str, ans)))
